@@ -1,0 +1,30 @@
+{
+    "files.autoSave": "onFocusChange",
+    "zenMode.hideTabs": false,
+    "zenMode.hideActivityBar": false,
+    "explorer.sortOrder": "filesFirst",
+    "files.associations": {
+        "*.tcc": "cpp",
+        "cctype": "cpp",
+        "clocale": "cpp",
+        "cstdint": "cpp",
+        "cstdio": "cpp",
+        "cstdlib": "cpp",
+        "cwchar": "cpp",
+        "cwctype": "cpp",
+        "exception": "cpp",
+        "initializer_list": "cpp",
+        "iosfwd": "cpp",
+        "iostream": "cpp",
+        "istream": "cpp",
+        "limits": "cpp",
+        "new": "cpp",
+        "ostream": "cpp",
+        "stdexcept": "cpp",
+        "streambuf": "cpp",
+        "system_error": "cpp",
+        "type_traits": "cpp",
+        "typeinfo": "cpp"
+    },
+    "editor.fontFamily": "'Meslo LG M', 'Monaco'"
+}
