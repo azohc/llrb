@@ -3,14 +3,9 @@
 
 /*
 
-
-
 */
 
 #include <list>
-
-const bool RED = true;
-const bool BLACK = false;
 
 template <class K, class V>
 class LLRBTree {
@@ -34,7 +29,8 @@ public:
     
     //Insert an element into the tree
     void insert(K key, V value){
-         
+        _root = insert_nod(_root, key, value);
+        _root->_color = BLACK;
     }
 
     
@@ -43,7 +39,7 @@ public:
 
 
     //Search for a key in the tree. Return associated value if key is present
-    V search(const K &key){
+    V search(const K &key) {
         Node *x = _root;
         while (x != nullptr) {
             if (key == x->_key)
@@ -53,9 +49,21 @@ public:
             else
                 x = x->_right;
         }
-        return nullptr;
+        throw "Key not found in the tree.";
     }
 
+    bool contains(const K &key) {
+        Node *x = _root;
+        while (x != nullptr) {
+            if (key == x->_key)
+                return true;
+            else if (key < x->_key)
+                x = x->_left;
+            else
+                x = x->_right;
+        }
+        return false;
+    }
 
     std::list<V> inorder_treewalk(){
         std::list<V> l;
@@ -65,13 +73,19 @@ public:
     
     /*
     Maybe make get iterator to key
-    Maybe make observer function that checks if a given key exists in the tree
     */
     
-protected:
+private:    
+
+    enum { 
+        RED = true, 
+        BLACK = false, 
+        RIGHT = true, 
+        LEFT = false 
+    };
+
     class Node {
     public:
-        // Leaf constructor, needed?
         Node() {
             _color = BLACK;
             _left = nullptr;
@@ -101,20 +115,51 @@ protected:
     //     _root = root;
     // }
 
+    Node* insert_nod(Node* z, K key, V value) {
+        if (z == nullptr)
+            return new Node(key, value);
 
-private:    
+            if (isRed(z->_left) && isRed(z->_right)) 
+                colorFlip(z);       
 
-    void insert_fixup(Node* z) {
-      
+            if (key == z->_key)     
+                z->_value = value;       
+
+            else if (key < z->_key) 
+                z->_left = insert_nod(z->_left, key, value);     
+
+            else              
+                z->_right = insert_nod(z->_right, key, value);   
+
+            if (isRed(z->_right) && !isRed(z->_left))    
+                z = rotate(z, LEFT); 
+
+            if (isRed(z->_left) && isRed(z->_left->_left)) 
+                z = rotate(z, RIGHT);   
+
+        return z;
     }
 
-    void left_rotate(Node* x) {
-       
+    
+
+    // Performs a left or right rotate on node z
+    // right ? right rotate node z : left rotate node z
+    Node* rotate(Node* z, bool right) {
+        Node* x;
+        right ? x = z->_left            : x = z->_right;   
+        right ? z->_left = x->_right    : z->_right = x->_left;
+        right ? x->_right = z           : x->_left = z;   
+        x->_color = z->_color;   
+        z->_color = RED;   
+        return x;
     }
 
-    void right_rotate(Node* x) {
-       
+    void colorFlip(Node* z) {
+        z->_color = !z->_color;
+        z->_left->_color = !z->_left->_color;
+        z->_right->_color = !z->_right->_color;
     }
+
 
     bool isRed(const Node *n) const {
         if (n == nullptr)
