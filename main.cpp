@@ -20,26 +20,33 @@ int main(){
     t.insert(14,14);
     t.insert(15,15);
 
-    list<int> l = t.inorder_treewalk();
+    t.insert(5, 11);
+    t.insert(-11, 11);
 
-    for(list<int>::const_iterator it = l.cbegin(); it != l.cend(); it++)
-        cout << *it << " ";
+
+    list<int> k = t.get_keys_inorder();
+    list<int>::const_iterator kit = k.cbegin();
+
+    list<int> v = t.get_values_inorder();
+    list<int>::const_iterator vit = v.cbegin();
+
+    while(kit != k.cend())
+        cout << "(" << *kit++ << ", " << *vit++ << "),";
 
     cout << endl;   
 
-    try{
-    cout << "inexistent key, 91: t.search(91) returns " << t.search(91) << endl << endl;
-    } catch (const char* msg) {
-        std::cerr << msg << endl;
-    }
+    // try{
+    // cout << "inexistent key, 91: t.search(91) returns " << t.search(91) << endl << endl;
+    // } catch (std::exception &e) {
+    //     std::cerr << e.what() << endl;
+    // }
 
-    int keys = 5;
-    if(t.contains(keys))
-        cout << "Tree contains key-value pair (" << keys << ", " << t.search(keys) << ")." << endl;
-    else
-        cout << "No matches for key " << keys << endl;
+    // int keys = 5;
+    // if(t.contains(keys))
+    //     cout << "Tree contains key-value pair (" << keys << ", " << t.search(keys) << ")." << endl;
+    // else
+    //     cout << "No matches for key " << keys << endl;
   
     
-    //system("PAUSE");
     return 0;
 }
