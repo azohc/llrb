@@ -4,10 +4,13 @@
 /*
 http://cplusplus.kurttest.com/notes/llrb.html
 http://www.teachsolaisgames.com/articles/balanced_left_leaning.html
+https://stackoverflow.com/questions/37492768/inserting-element-into-left-leaning-black-red-tree-c (good main for testing)
 */
 
+#include <memory>
 #include <exception>
 #include <list>
+
 
 // Exception that arises with searches of keys that are not in the tree
 class inexistent_key : public std::exception {
@@ -23,12 +26,12 @@ class LLRBTree {
 public:
     //Constructor for an empty tree
     LLRBTree() {
-       _root = new Node();
+       _root = std::make_shared<Node>(Node());
     } 
 
     //Constructor for a single-node tree
     LLRBTree(const K key, const V value) {
-       _root = new Node(key, value);
+       _root = std::make_shared<Node>(Node(key, value));
     }
 
     //Destructor
@@ -52,7 +55,7 @@ public:
 
     //Search for a key in the tree. Return associated value if key is present
     V search(const K &key) const {
-        Node *x = _root;
+        nodeptr x = _root;
         while (x != nullptr) {
             if (key == x->_key)
                 return x->_value;
@@ -64,8 +67,13 @@ public:
         throw inexistent_key();
     }
 
+    void delete_min() {
+        _root = rec_delete_min(_root);
+        _root->_color = black;
+    }
+
     bool contains(const K &key) const {
-        Node *x = _root;
+        nodeptr x = _root;
         while (x != nullptr) {
             if (key == x->_key)
                 return true;
@@ -119,15 +127,17 @@ private:
         bool _color;
         K _key;
         V _value;
-        Node *_left;
-        Node *_right;
+        std::shared_ptr<Node> _left;
+        std::shared_ptr<Node> _right;
     };
 
-    Node *_root;
+    using nodeptr = std::shared_ptr<Node>;
 
-    Node* rec_insert(Node* z, const K &key, const V &value) {
+    nodeptr _root;
+
+    nodeptr rec_insert(nodeptr z, const K &key, const V &value) {
         if (z == nullptr)
-            return new Node(key, value);
+            return std::make_shared<Node>(Node(key, value));
 
             if (is_red(z->_left) && is_red(z->_right)) 
                 color_flip(z);       
@@ -150,7 +160,7 @@ private:
         return z;
     }
 
-    Node* rec_remove(Node *z, const K &key){
+    nodeptr rec_remove(nodeptr z, const K &key){
         if (key < z->_key) {
             if (!is_red(z->_left) && !is_red(z->_left->_left))
                 z = move_red_left(z);
@@ -159,15 +169,18 @@ private:
         else {
             if (is_red(z->_left))
                 z = rotate(right, z);
-            if (key == z->_key && z->_right == nullptr)
+            if (key == z->_key && z->_right == nullptr){
+                free(z);
                 return nullptr; //check if ok
+            }
             if (!is_red(z->_right) && !is_red(z->_right->_left))
                 z = move_red_right(z);
+
             if (key == z->_key) {
-                //TODO
-                // h.val = get(h.right, min(h.right).key);
-                // h.key = min(h.right).key;
-                // h.right = deleteMin(h.right);
+                nodeptr min_nod = min_node(z->_right);
+                z->_key = min_nod->_key;
+                z->_value = min_nod->_value;
+                z->_right = rec_delete_min(z->_right);
             }
             else
                 z->_right = rec_remove(z->_right, key);
@@ -175,10 +188,20 @@ private:
         return fix_up(z);   
     }
 
+    nodeptr rec_delete_min(nodeptr z){
+        if (z->_left == nullptr)
+            return nullptr;
+        if(!is_red(z->_left) && !is_red(z->_left->_left))
+            z = move_red_left(z);
+        
+        z->_left = rec_delete_min(z->_left);
+
+        return fix_up(z);
+    }
     // Performs a left or right rotate on node z
     // right ? right rotate node z : left rotate node z
-    Node* rotate(bool right, Node* z) {
-        Node* x;
+    nodeptr rotate(bool right, nodeptr z) {
+        nodeptr x;
         right ? x = z->_left            : x = z->_right;   
         right ? z->_left = x->_right    : z->_right = x->_left;
         right ? x->_right = z           : x->_left = z;   
@@ -187,13 +210,22 @@ private:
         return x;
     }
 
-    void color_flip(Node* z) {
-        z->_color = !z->_color;
-        z->_left->_color = !z->_left->_color;
-        z->_right->_color = !z->_right->_color;
+    nodeptr fix_up(nodeptr z){
+        if (is_red(z->_right) && !is_red(z->_left))       
+            z = rotate(left, z);
+        if (is_red(z->_left) && is_red(z->_left->_left)) 
+            z = rotate(right, z);
+        if(is_red(z->_left) && is_red(z->_right))          
+            color_flip(z);
+
+        return z;
     }
 
-    Node* move_red_left(Node* z) {
+    nodeptr min_node(nodeptr z){
+        return z->_left != nullptr ? min_node(z->_left) : z;
+    }
+
+    nodeptr move_red_left(nodeptr z) {
         color_flip(z);
         if (is_red(z->_right->_left)) {
             z->_right = rotate(right, z->_right);
@@ -203,7 +235,7 @@ private:
         return z;
     }
 
-    Node* move_red_right(Node* z) {
+    nodeptr move_red_right(nodeptr z) {
         color_flip(z);
         if (is_red(z->_left->_left)) {
             z = rotate(right, z);
@@ -212,13 +244,19 @@ private:
         return z;
     }
 
-    bool is_red(const Node *n) const {
+    void color_flip(nodeptr z) {
+        z->_color = !z->_color;
+        z->_left->_color = !z->_left->_color;
+        z->_right->_color = !z->_right->_color;
+    }  
+
+    bool is_red(const nodeptr n) const {
         if (n == nullptr)
             return false;
         return n->_color;
     }
 
-    void gen_key_list_inorder(std::list<K> &l, const Node* r) const {
+    void gen_key_list_inorder(std::list<K> &l, const nodeptr r) const {
         if (r == nullptr)
             return;
         gen_key_list_inorder(l, r->_left);
@@ -226,7 +264,7 @@ private:
         gen_key_list_inorder(l, r->_right);
     }
 
-    void gen_val_list_inorder(std::list<V> &l, const Node* r) const {
+    void gen_val_list_inorder(std::list<V> &l, const nodeptr r) const {
         if (r == nullptr)
             return;
         gen_val_list_inorder(l, r->_left);
@@ -235,11 +273,11 @@ private:
     }
 
     //Free all the children nodes that branch from root    
-    void free(Node *root) {
+    void free(nodeptr root) {
         if(root != nullptr) {
             free(root->_left);
             free(root->_right);
-            delete root;
+            root.reset();
         }
     }
 };
