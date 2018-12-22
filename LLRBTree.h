@@ -58,8 +58,12 @@ public:
     //Delete a key in the tree
     void remove(K key) 
     {
-        _root = rec_remove(_root, key);
-        _root->_color = BLACK;
+        if(_root != nullptr)
+        {
+            _root = rec_remove(_root, key);
+            if(_root != nullptr)
+                _root->_color = BLACK;
+        }
     }
 
     //Search for a key in the tree. Return associated value if key is present
@@ -143,19 +147,19 @@ private:
         if (h == nullptr)
             return std::make_shared<Node>(Node(key, value));
 
-        if (key == h->_key) //Prevents duplicates
+        if (key == h->_key) //Duplicate key, replace value
             h->_value = value;       
         else if (key < h->_key) 
             h->_left = rec_insert(h->_left, key, value);     
         else              
             h->_right = rec_insert(h->_right, key, value);   
 
-        if (is_red(h->_right))  
-            h = rotate(LEFT, h); 
-
-        // TEST
-        // if (is_red(h->_right) && !is_red(h->_left))    
+        // // TEST
+        // if (is_red(h->_right))  
         //     h = rotate(LEFT, h); 
+
+        if (is_red(h->_right) && !is_red(h->_left))    
+            h = rotate(LEFT, h); 
 
         if (is_red(h->_left) && is_red(h->_left->_left)) 
             h = rotate(RIGHT, h);   
@@ -182,24 +186,32 @@ private:
                 free(h);
                 return nullptr;
             }
-            if (!is_red(h->_right) && !is_red(h->_right->_left))
-                h = move_red_right(h);
-
-            if (key == h->_key) 
+            if(h->_right != nullptr)
             {
-                nodeptr m = min_node(h->_right);
-                h->_value = get(h->_right, m->_key)->_value;
-                h->_key = m->_key;
-                h->_right = rec_delete_min(h->_right);
-                
-                // TEST
-                // nodeptr min_nod = min_node(h->_right);
-                // h->_key = min_nod->_key;
-                // h->_value = min_nod->_value;
-                // h->_right = rec_delete_min(h->_right);
+                if (!is_red(h->_right) && !is_red(h->_right->_left))
+                    h = move_red_right(h);
+
+                if (key == h->_key) 
+                {
+                    nodeptr m = min_node(h->_right);
+                    h->_value = get(h->_right, m->_key)->_value;
+                    h->_key = m->_key;
+                    h->_right = rec_delete_min(h->_right);
+
+                    // nodeptr m = min_node(h->_right);
+                    // h->_value = get(h->_right, m->_key)->_value;
+                    // h->_key = m->_key;
+                    // h->_right = rec_delete_min(h->_right);
+                    
+                    // TEST
+                    // nodeptr min_nod = min_node(h->_right);
+                    // h->_key = min_nod->_key;
+                    // h->_value = min_nod->_value;
+                    // h->_right = rec_delete_min(h->_right);
+                }
+                else
+                    h->_right = rec_remove(h->_right, key);
             }
-            else
-                h->_right = rec_remove(h->_right, key);
         }
         return fixup(h);   
     }
@@ -207,7 +219,10 @@ private:
     nodeptr rec_delete_min(nodeptr h)
     {
         if (h->_left == nullptr)
+        {
+            free(h);
             return nullptr;
+        }
         if (!is_red(h->_left) && !is_red(h->_left->_left))
             h = move_red_left(h);
         
@@ -252,6 +267,7 @@ private:
         
         if (is_red(h->_left) && is_red(h->_left->_left)) 
             h = rotate(RIGHT, h);
+
         if(is_red(h->_left) && is_red(h->_right))          
             color_flip(h);
 
