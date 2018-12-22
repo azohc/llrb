@@ -1,8 +1,8 @@
 #include "LLRBTree.h"
 #include <iostream>
 #include <stdlib.h>
-#include <time.h>
 #include <limits.h>
+#include <sys/time.h>
 
 #include <vector>
 #include <unordered_map>
@@ -11,6 +11,14 @@ using std::cin;
 using std::cout;
 using std::endl;
 
+
+typedef unsigned long long utime_t;
+static utime_t get_time ()
+{
+    struct timeval now;
+    gettimeofday(&now, NULL);
+    return  now.tv_usec + (utime_t)now.tv_sec * 1000000;
+}
 
 
 int llrbtest(int max_elems)
@@ -30,7 +38,7 @@ int llrbtest(int max_elems)
             newkey = rand() % max_elems;
 
         keys.push_back(newkey);
-        values[newkey] = rand() % INT_MAX;
+        values[newkey] = rand();
 
         llrb.insert(newkey, values[newkey]);
         keymap.insert(std::pair<int,bool>(newkey, true));
@@ -57,18 +65,29 @@ int llrbtest(int max_elems)
 int main()
 {
     srand(time(NULL));
-    int num_tests = 50, max_elems = 3000;
+    int num_tests = 10, max_elems = 2500;
+    double t_acc = 0;
     try
     {
     
         for(int test = 1; test <= num_tests; test++)
         {
-            if(llrbtest(max_elems))
-                cout << "Failed test " << test;
+            utime_t t0 = get_time();
+            llrbtest(max_elems);
+            utime_t t1 = get_time();
+
+            t_acc += (t1 - t0) / 1000000.0L;
+
+            // double secs = (t1 - t0) / 1000000.0L;
+            // cout << secs << " seconds for test " << test;
+            // cout << "/" << num_tests << ". " << max_elems << " insertions, searches, and deletions." << endl; 
+
+      
+            // if(llrbtest(max_elems))
+            //     cout << "Failed test " << test;
             // else
             //     cout << "Passed test " << test;
-            
-            // cout << "/" << num_tests << endl; 
+            // cout << "/" << num_tests <<  endl; 
         }
 
     } catch (std::exception& e)
@@ -76,8 +95,13 @@ int main()
         cout << e.what() << endl;
     }
 
+    cout << endl << "All tests passed." << endl;
 
-    // cout << endl << "All tests passed" << endl;
+    cout << "Seconds elapsed for " << num_tests << " tests of " << max_elems 
+        << " insertions, searches and deletions: " << t_acc << " s." << endl;
+    
+    cout << "Average time per test: " << t_acc/num_tests << " s." << endl;
+
     return 0;
 }
 

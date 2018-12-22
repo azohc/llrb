@@ -4,6 +4,7 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
+
         {
             "name": "Win gdb",
             "type": "cppdbg",
@@ -26,6 +27,30 @@
                 }
             ],
             "preLaunchTask": "Win build"
+        },
+        {
+            "name": "lnx gdb",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/main",
+            "args": [
+                
+            ],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": true,
+            "MIMode": "gdb",
+            "miDebuggerPath": "/usr/bin/gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            "preLaunchTask": "lnx build"
         }
+
     ]
 }
