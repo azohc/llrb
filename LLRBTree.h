@@ -154,10 +154,6 @@ private:
         else              
             h->_right = rec_insert(h->_right, key, value);   
 
-        // // TEST
-        // if (is_red(h->_right))  
-        //     h = rotate(LEFT, h); 
-
         if (is_red(h->_right) && !is_red(h->_left))    
             h = rotate(LEFT, h); 
 
@@ -197,17 +193,6 @@ private:
                     h->_value = get(h->_right, m->_key)->_value;
                     h->_key = m->_key;
                     h->_right = rec_delete_min(h->_right);
-
-                    // nodeptr m = min_node(h->_right);
-                    // h->_value = get(h->_right, m->_key)->_value;
-                    // h->_key = m->_key;
-                    // h->_right = rec_delete_min(h->_right);
-                    
-                    // TEST
-                    // nodeptr min_nod = min_node(h->_right);
-                    // h->_key = min_nod->_key;
-                    // h->_value = min_nod->_value;
-                    // h->_right = rec_delete_min(h->_right);
                 }
                 else
                     h->_right = rec_remove(h->_right, key);
@@ -260,10 +245,6 @@ private:
     {   
         if (is_red(h->_right))       
             h = rotate(LEFT, h);
-
-        // TEST
-        // if (is_red(h->_right) && !is_red(h->_left))       
-        //     h = rotate(LEFT, h);
         
         if (is_red(h->_left) && is_red(h->_left->_left)) 
             h = rotate(RIGHT, h);
