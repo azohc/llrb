@@ -4,7 +4,8 @@
 /*
 http://cplusplus.kurttest.com/notes/llrb.html
 http://www.teachsolaisgames.com/articles/balanced_left_leaning.html
-https://stackoverflow.com/questions/37492768/inserting-element-into-left-leaning-black-red-tree-c (good main for testing)
+https://stackoverflow.com/questions/37492768/inserting-element-into-LEFT-leaning-BLACK  RED-tree-c (good main for testing)
+http://www.cs.princeton.edu/~rs/talks/LLRB/Java/RedBlackBST.java
 */
 
 #include <memory>
@@ -13,86 +14,84 @@ https://stackoverflow.com/questions/37492768/inserting-element-into-left-leaning
 
 
 // Exception that arises with searches of keys that are not in the tree
-class inexistent_key : public std::exception {
+class inexistent_key : public std::exception 
+{
 public:
-    virtual const char* what() const throw() {
+    virtual const char* what() const throw() 
+    {
         return "Specified key does not exist in the tree";
     }
 };
 
 
 template <class K, class V>
-class LLRBTree {
+class LLRBTree 
+{
 public:
     //Constructor for an empty tree
-    LLRBTree() {
+    LLRBTree() 
+    {
        _root = std::make_shared<Node>(Node());
     } 
 
     //Constructor for a single-node tree
-    LLRBTree(const K key, const V value) {
+    LLRBTree(const K key, const V value) 
+    {
        _root = std::make_shared<Node>(Node(key, value));
     }
 
     //Destructor
-    ~LLRBTree() {
+    ~LLRBTree() 
+    {
         free(_root);
         _root = nullptr;
     }
 
 
     //Insert an element into the tree
-    void insert(K key, V value) {
+    void insert(K key, V value) 
+    {
         _root = rec_insert(_root, key, value);
-        _root->_color = black;
+        _root->_color = BLACK;
     }
 
     //Delete a key in the tree
-    void remove(K key) {
+    void remove(K key) 
+    {
         _root = rec_remove(_root, key);
-        _root->_color = black;
+        _root->_color = BLACK;
     }
 
     //Search for a key in the tree. Return associated value if key is present
-    V search(const K &key) const {
-        nodeptr x = _root;
-        while (x != nullptr) {
-            if (key == x->_key)
-                return x->_value;
-            else if (key < x->_key)
-                x = x->_left;
-            else
-                x = x->_right;
-        }
-        throw inexistent_key();
+    V get(const K &key) 
+    {
+        nodeptr nod = get(_root, key);
+        if (nod == nullptr)
+            throw inexistent_key();
+        return nod->_value;
     }
 
-    void delete_min() {
+    bool contains(const K &key) const 
+    {
+        return get(_root, key) != nullptr;
+    }
+
+    void delete_min() 
+    {
         _root = rec_delete_min(_root);
-        _root->_color = black;
-    }
-
-    bool contains(const K &key) const {
-        nodeptr x = _root;
-        while (x != nullptr) {
-            if (key == x->_key)
-                return true;
-            else if (key < x->_key)
-                x = x->_left;
-            else
-                x = x->_right;
-        }
-        return false;
+        _root->_color = BLACK;
     }
 
     //Maybe change list getters to take argument for inorder, preorder, postorder...
-    std::list<K> get_keys_inorder() const {
+    std::list<K> get_keys_inorder() const 
+    {
         std::list<K> l;
         gen_key_list_inorder(l, _root);
         return l;
     }
 
-    std::list<V> get_values_inorder() const {
+    std::list<V> get_values_inorder() const 
+    {
         std::list<V> l;
         gen_val_list_inorder(l, _root);
         return l;
@@ -101,25 +100,29 @@ public:
     
 private:    
 
-    enum { 
-        red = true, 
-        black = false, 
-        right = true, 
-        left = false 
+    enum 
+    { 
+        RED = true, 
+        BLACK = false, 
+        RIGHT = true, 
+        LEFT = false 
     };
 
-    class Node {
+    class Node 
+    {
     public:
-        Node() {
-            _color = black;
+        Node() 
+        {
+            _color = BLACK;
             _left = nullptr;
             _right = nullptr;
         }
 
-        Node(K key, V value) {
+        Node(K key, V value) 
+        {
             _key = key;
             _value = value;
-            _color = red;
+            _color =    RED;
             _left = nullptr;
             _right = nullptr;
         }
@@ -135,128 +138,170 @@ private:
 
     nodeptr _root;
 
-    nodeptr rec_insert(nodeptr z, const K &key, const V &value) {
-        if (z == nullptr)
+    nodeptr rec_insert(nodeptr h, const K &key, const V &value) 
+    {
+        if (h == nullptr)
             return std::make_shared<Node>(Node(key, value));
 
-            if (is_red(z->_left) && is_red(z->_right)) 
-                color_flip(z);       
+        if (key == h->_key) //Prevents duplicates
+            h->_value = value;       
+        else if (key < h->_key) 
+            h->_left = rec_insert(h->_left, key, value);     
+        else              
+            h->_right = rec_insert(h->_right, key, value);   
 
-            if (key == z->_key) //Prevents duplicates
-                z->_value = value;       
+        if (is_red(h->_right))  
+            h = rotate(LEFT, h); 
 
-            else if (key < z->_key) 
-                z->_left = rec_insert(z->_left, key, value);     
+        // TEST
+        // if (is_red(h->_right) && !is_red(h->_left))    
+        //     h = rotate(LEFT, h); 
 
-            else              
-                z->_right = rec_insert(z->_right, key, value);   
+        if (is_red(h->_left) && is_red(h->_left->_left)) 
+            h = rotate(RIGHT, h);   
 
-            if (is_red(z->_right) && !is_red(z->_left))    
-                z = rotate(left, z); 
+        if (is_red(h->_left) && is_red(h->_right)) 
+            color_flip(h);       
 
-            if (is_red(z->_left) && is_red(z->_left->_left)) 
-                z = rotate(right, z);   
-
-        return z;
+        return h;
     }
 
-    nodeptr rec_remove(nodeptr z, const K &key){
-        if (key < z->_key) {
-            if (!is_red(z->_left) && !is_red(z->_left->_left))
-                z = move_red_left(z);
-            z->_left = rec_remove(z->_left, key);
+    nodeptr rec_remove(nodeptr h, const K &key)
+    {
+        if (key < h->_key) 
+        {
+            if (!is_red(h->_left) && !is_red(h->_left->_left))
+                h = move_red_left(h);
+            h->_left = rec_remove(h->_left, key);
         }
         else {
-            if (is_red(z->_left))
-                z = rotate(right, z);
-            if (key == z->_key && z->_right == nullptr){
-                free(z);
-                return nullptr; //check if ok
+            if (is_red(h->_left))
+                h = rotate(RIGHT, h);
+            if (key == h->_key && h->_right == nullptr)
+            {
+                free(h);
+                return nullptr;
             }
-            if (!is_red(z->_right) && !is_red(z->_right->_left))
-                z = move_red_right(z);
+            if (!is_red(h->_right) && !is_red(h->_right->_left))
+                h = move_red_right(h);
 
-            if (key == z->_key) {
-                nodeptr min_nod = min_node(z->_right);
-                z->_key = min_nod->_key;
-                z->_value = min_nod->_value;
-                z->_right = rec_delete_min(z->_right);
+            if (key == h->_key) 
+            {
+                nodeptr m = min_node(h->_right);
+                h->_value = get(h->_right, m->_key)->_value;
+                h->_key = m->_key;
+                h->_right = rec_delete_min(h->_right);
+                
+                // TEST
+                // nodeptr min_nod = min_node(h->_right);
+                // h->_key = min_nod->_key;
+                // h->_value = min_nod->_value;
+                // h->_right = rec_delete_min(h->_right);
             }
             else
-                z->_right = rec_remove(z->_right, key);
+                h->_right = rec_remove(h->_right, key);
         }
-        return fix_up(z);   
+        return fixup(h);   
     }
 
-    nodeptr rec_delete_min(nodeptr z){
-        if (z->_left == nullptr)
+    nodeptr rec_delete_min(nodeptr h)
+    {
+        if (h->_left == nullptr)
             return nullptr;
-        if(!is_red(z->_left) && !is_red(z->_left->_left))
-            z = move_red_left(z);
+        if (!is_red(h->_left) && !is_red(h->_left->_left))
+            h = move_red_left(h);
         
-        z->_left = rec_delete_min(z->_left);
+        h->_left = rec_delete_min(h->_left);
 
-        return fix_up(z);
+        return fixup(h);
     }
-    // Performs a left or right rotate on node z
-    // right ? right rotate node z : left rotate node z
-    nodeptr rotate(bool right, nodeptr z) {
+
+    nodeptr get(nodeptr x, const K &key)
+    {
+        if (x == nullptr) 
+            return nullptr;
+        if (key == x->_key)
+            return x;
+        else if (key < x->_key)
+            return get(x->_left, key);
+        else
+            return get(x->_right, key);
+    }
+
+    // Performs a LEFT or RIGHT rotate on node h
+    // RIGHT ? RIGHT rotate node h : LEFT rotate node h
+    nodeptr rotate(bool RIGHT, nodeptr h) 
+    {
         nodeptr x;
-        right ? x = z->_left            : x = z->_right;   
-        right ? z->_left = x->_right    : z->_right = x->_left;
-        right ? x->_right = z           : x->_left = z;   
-        x->_color = z->_color;   
-        z->_color = red;   
+        RIGHT ? x = h->_left            : x = h->_right;   
+        RIGHT ? h->_left = x->_right    : h->_right = x->_left;
+        RIGHT ? x->_right = h           : x->_left = h;   
+        x->_color = h->_color;   
+        h->_color = RED;   
         return x;
     }
 
-    nodeptr fix_up(nodeptr z){
-        if (is_red(z->_right) && !is_red(z->_left))       
-            z = rotate(left, z);
-        if (is_red(z->_left) && is_red(z->_left->_left)) 
-            z = rotate(right, z);
-        if(is_red(z->_left) && is_red(z->_right))          
-            color_flip(z);
+    nodeptr fixup(nodeptr h)
+    {   
+        if (is_red(h->_right))       
+            h = rotate(LEFT, h);
 
-        return z;
+        // TEST
+        // if (is_red(h->_right) && !is_red(h->_left))       
+        //     h = rotate(LEFT, h);
+        
+        if (is_red(h->_left) && is_red(h->_left->_left)) 
+            h = rotate(RIGHT, h);
+        if(is_red(h->_left) && is_red(h->_right))          
+            color_flip(h);
+
+        return h;
     }
 
-    nodeptr min_node(nodeptr z){
-        return z->_left != nullptr ? min_node(z->_left) : z;
+    nodeptr min_node(nodeptr h)
+    {
+        return h->_left != nullptr ? min_node(h->_left) : h;
     }
 
-    nodeptr move_red_left(nodeptr z) {
-        color_flip(z);
-        if (is_red(z->_right->_left)) {
-            z->_right = rotate(right, z->_right);
-            z = rotate(left, z);
-            color_flip(z);
+    nodeptr move_red_left(nodeptr h) 
+    {
+        color_flip(h);
+        if (is_red(h->_right->_left)) 
+        {
+            h->_right = rotate(RIGHT, h->_right);
+            h = rotate(LEFT, h);
+            color_flip(h);
         }
-        return z;
+        return h;
     }
 
-    nodeptr move_red_right(nodeptr z) {
-        color_flip(z);
-        if (is_red(z->_left->_left)) {
-            z = rotate(right, z);
-            color_flip(z);
+    nodeptr move_red_right(nodeptr h) 
+    {
+        color_flip(h);
+        if (is_red(h->_left->_left)) 
+        {
+            h = rotate(RIGHT, h);
+            color_flip(h);
         }
-        return z;
+        return h;
     }
 
-    void color_flip(nodeptr z) {
-        z->_color = !z->_color;
-        z->_left->_color = !z->_left->_color;
-        z->_right->_color = !z->_right->_color;
+    void color_flip(nodeptr h)
+    {
+        h->_color = !h->_color;
+        h->_left->_color = !h->_left->_color;
+        h->_right->_color = !h->_right->_color;
     }  
 
-    bool is_red(const nodeptr n) const {
+    bool is_red(const nodeptr n) const 
+    {
         if (n == nullptr)
             return false;
         return n->_color;
     }
 
-    void gen_key_list_inorder(std::list<K> &l, const nodeptr r) const {
+    void gen_key_list_inorder(std::list<K> &l, const nodeptr r) const 
+    {
         if (r == nullptr)
             return;
         gen_key_list_inorder(l, r->_left);
@@ -264,7 +309,8 @@ private:
         gen_key_list_inorder(l, r->_right);
     }
 
-    void gen_val_list_inorder(std::list<V> &l, const nodeptr r) const {
+    void gen_val_list_inorder(std::list<V> &l, const nodeptr r) const 
+    {
         if (r == nullptr)
             return;
         gen_val_list_inorder(l, r->_left);
@@ -273,8 +319,10 @@ private:
     }
 
     //Free all the children nodes that branch from root    
-    void free(nodeptr root) {
-        if(root != nullptr) {
+    void free(nodeptr root) 
+    {
+        if(root != nullptr) 
+        {
             free(root->_left);
             free(root->_right);
             root.reset();
