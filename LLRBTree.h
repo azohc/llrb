@@ -28,10 +28,11 @@ template <class K, class V>
 class LLRBTree 
 {
 public:
+
     //Constructor for an empty tree
     LLRBTree() 
     {
-       _root = std::make_shared<Node>(Node());
+       _root = nullptr;
     } 
 
     //Constructor for a single-node tree
@@ -46,7 +47,6 @@ public:
         free(_root);
         _root = nullptr;
     }
-
 
     //Insert an element into the tree
     void insert(K key, V value) 
