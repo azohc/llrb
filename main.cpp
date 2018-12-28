@@ -145,12 +145,32 @@ void opt_st()
     {
         cout << "enter y for yes or n for no: ";
         cin >> c;
-    }  
-
-
+    } 
     stresstest(n_tests, m_elems, true);
 }
 
+void opt_help()
+{
+    cout << "1. -> stress test" << endl
+        << "\t perform X tests of Y insertions, searches and deletions." << endl
+        << "\t you must enter X and Y, and the option to print the output of tests." << endl << endl
+
+        << "2. -> read tree from file" << endl
+        << "\t load a tree from a text file. there are files containing trees in the folder test_trees." << endl
+        << "\t you must provide the path to a file that has a format similar to the test_trees files." << endl << endl
+
+        << "3. -> test insertion" << endl
+        << "\t measure the execution time of insert operation by inserting key value pairs into a tree." << endl << endl
+
+        << "4. -> test search" << endl
+        << "\t measure the execution time of search operation by getting key value pairs from a tree." << endl << endl
+
+        << "5. -> test deletion" << endl
+        << "\t measure the execution time of delete operation by deleting key value pairs from a tree." << endl << endl
+
+        << "6. -> print help" << endl
+        << "\t print this message." << endl << endl;
+}
 
 template <class K, class V>
 LLRBTree<K,V> readtree(const char* path)
@@ -191,16 +211,18 @@ void benchmark_insert(LLRBTree<K,V> &t, const std::vector<K> &keys, const std::v
     }
 }
 
+void printmenu(){
+    cout << endl << "left leaning red black tree test menu" << endl 
+        << "\t1. \t->\t stress test" << endl
+        << "\t2. \t->\t read tree from file" << endl
+        << "\t3. \t->\t test insertion" << endl
+        << "\t4. \t->\t test search" << endl
+        << "\t5. \t->\t test deletion" << endl
+        << "\t6 \t->\t print help" << endl
+        << "\t0. \t->\t exit" << endl;
+}
 int getchoice(){
     int choice = -1;
-    cout << "left leaning red black tree test menu" << endl 
-        << "\t2. \t->\t stress test" << endl
-        << "\t3. \t->\t read tree from file" << endl
-        << "\t4. \t->\t test insertion" << endl
-        << "\t5. \t->\t test search" << endl
-        << "\t6. \t->\t test deletion" << endl
-        << "\t1. \t->\t print help" << endl
-        << "\t0. \t->\t exit" << endl;
 
     cout << "enter your option: ";
     cin >> choice;
@@ -209,23 +231,24 @@ int getchoice(){
         cout << "enter your option (0 to 6): ";
         cin >> choice;
     }
+    cout << endl;
     return choice;
 }
 
 
 int main()
 {
+    printmenu();
     int choice = getchoice();
     while(choice)
     {
         switch(choice)
         {
             case 1:
-
+                opt_st();
                 break;
             case 2:
             
-                opt_st();
                 break;
             case 3:
             
@@ -237,11 +260,14 @@ int main()
             
                 break;
             case 6: 
-
+                opt_help();
                 break;
         }
+        if(choice != 6)
+            printmenu();
         choice = getchoice();
     }
+    
 
     return 0;
     
