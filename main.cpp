@@ -119,59 +119,6 @@ int stresstest(int num_tests, int max_elems, bool verbose)
     return 0;
 }
 
-void opt_st()
-{
-    int n_tests, m_elems;
-    char c;
-    cout << endl << "maximum number of elements to test with: ";
-    cin >> m_elems;
-    while(m_elems < 1)
-    {
-        cout << "enter a positive number: ";
-        cin >> m_elems;
-    }
-    
-    cout << "number of tests to execute: ";
-    cin >> n_tests;
-    while(n_tests < 1)
-    {
-        cout << "enter a positive number: ";
-        cin >> m_elems;
-    }
-
-    cout << "print output messages? (y/n): ";
-    cin >> c;
-    while(tolower(c) != 'y' && tolower(c) != 'n')
-    {
-        cout << "enter y for yes or n for no: ";
-        cin >> c;
-    } 
-    stresstest(n_tests, m_elems, true);
-}
-
-void opt_help()
-{
-    cout << "1. -> stress test" << endl
-        << "\t perform X tests of Y insertions, searches and deletions." << endl
-        << "\t you must enter X and Y, and the option to print the output of tests." << endl << endl
-
-        << "2. -> read tree from file" << endl
-        << "\t load a tree from a text file. there are files containing trees in the folder test_trees." << endl
-        << "\t you must provide the path to a file that has a format similar to the test_trees files." << endl << endl
-
-        << "3. -> test insertion" << endl
-        << "\t measure the execution time of insert operation by inserting key value pairs into a tree." << endl << endl
-
-        << "4. -> test search" << endl
-        << "\t measure the execution time of search operation by getting key value pairs from a tree." << endl << endl
-
-        << "5. -> test deletion" << endl
-        << "\t measure the execution time of delete operation by deleting key value pairs from a tree." << endl << endl
-
-        << "6. -> print help" << endl
-        << "\t print this message." << endl << endl;
-}
-
 template <class K, class V>
 LLRBTree<K,V> readtree(const char* path)
 {
@@ -211,6 +158,70 @@ void benchmark_insert(LLRBTree<K,V> &t, const std::vector<K> &keys, const std::v
     }
 }
 
+
+void opt_stresstest()
+{
+    int n_tests, m_elems;
+    char c;
+    cout << endl << "maximum number of elements to test with: ";
+    cin >> m_elems;
+    while(m_elems < 1)
+    {
+        cout << "enter a positive number: ";
+        cin >> m_elems;
+    }
+    
+    cout << "number of tests to execute: ";
+    cin >> n_tests;
+    while(n_tests < 1)
+    {
+        cout << "enter a positive number: ";
+        cin >> m_elems;
+    }
+
+    cout << "print output messages? (y/n): ";
+    cin >> c;
+    while(tolower(c) != 'y' && tolower(c) != 'n')
+    {
+        cout << "enter y for yes or n for no: ";
+        cin >> c;
+    } 
+    stresstest(n_tests, m_elems, true);
+}
+
+LLRBTree<int,char> opt_readtree()
+{
+    char* path;
+    cout << "enter a file path, 'test_trees/test1.txt', for example (don't include apostrophes!)." << endl
+        << "file path: ";
+    cin >> path;
+
+    return readtree<int,char>(path);
+}
+
+void opt_help()
+{
+    cout << "1. -> stress test" << endl
+        << "\t perform X tests of Y insertions, searches and deletions." << endl
+        << "\t you must enter X and Y, and the option to print the output of tests." << endl << endl
+
+        << "2. -> read tree from file" << endl
+        << "\t load a tree from a text file. there are files containing trees in the folder test_trees." << endl
+        << "\t you must provide the path to a file that has a format similar to the test_trees files." << endl << endl
+
+        << "3. -> test insertion" << endl
+        << "\t measure the execution time of insert operation by inserting key value pairs into a tree." << endl << endl
+
+        << "4. -> test search" << endl
+        << "\t measure the execution time of search operation by getting key value pairs from a tree." << endl << endl
+
+        << "5. -> test deletion" << endl
+        << "\t measure the execution time of delete operation by deleting key value pairs from a tree." << endl << endl
+
+        << "6. -> print help" << endl
+        << "\t print this message." << endl << endl;
+}
+
 void printmenu(){
     cout << endl << "left leaning red black tree test menu" << endl 
         << "\t1. \t->\t stress test" << endl
@@ -240,25 +251,37 @@ int main()
 {
     printmenu();
     int choice = getchoice();
+    LLRBTree<int,char> tree;
     while(choice)
     {
         switch(choice)
         {
             case 1:
-                opt_st();
+                opt_stresstest();
                 break;
             case 2:
-            
+                tree = opt_readtree();
                 break;
             case 3:
-            
+                //make tree 
+                
+                //test insertions
+
                 break;
             case 4:
-            
+                //if no tree to insert into (make isempty func (llrb)) -> gen tree 
+                
+                //test searches
+
                 break;
             case 5:
-            
+                //if no tree to delete from, make tree to delete from
+
+                //test deletion
+
                 break;
+
+                //maybe add case to print tree
             case 6: 
                 opt_help();
                 break;
