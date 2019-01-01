@@ -15,6 +15,10 @@ using std::istream;
 using std::vector;
 
 
+const int SEARCH = 1;
+const int INSERT = 2;
+const int DELETE = 3;
+ 
 /*
 La entrega se hará o sumo el 8 de Enero, a través del Campus Virtual, 
 - con un texto fuente que pueda ser compilado y ejecutado, 
@@ -35,8 +39,8 @@ static utime_t get_time ()
 
 
 // Test LLRB Tree with random pairs of keys and values
-// executing max_elems insertions, searches and deletions num_tests times
-int stresstest(int num_tests, int max_elems, bool verbose)
+// executing max_init insertions, searches and deletions num_tests times
+int stresstest(int num_tests, int max_init, bool verbose)
 {
     double t_acc = 0;   // Accumulates time elapsed in executing a test loop
     LLRBTree<int,int> llrb;
@@ -49,16 +53,16 @@ int stresstest(int num_tests, int max_elems, bool verbose)
     {
         for (int test = 1; test <= num_tests; test++)
         {
-            int* values = new int[max_elems];       // Stores values associated to keys
+            int* values = new int[max_init];       // Stores values associated to keys
 
             // Insertion
-            for (int i = 0; i < max_elems; i++)
+            for (int i = 0; i < max_init; i++)
             {
-                int newkey = rand() % max_elems;
+                int newkey = rand() % max_init;
 
                 // To prevent the generation of duplicate keys, uncomment the next two lines
                 // while(keymap.count(newkey))
-                //     newkey = rand() % max_elems;
+                //     newkey = rand() % max_init;
 
                 if(!keymap[newkey])         // Only push keys that are not in the tree
                 {
@@ -123,7 +127,7 @@ int stresstest(int num_tests, int max_elems, bool verbose)
     {
         cout << endl << "All tests passed." << endl;
 
-        cout << "Seconds elapsed for " << num_tests << " tests of " << max_elems 
+        cout << "Seconds elapsed for " << num_tests << " tests of " << max_init 
             << " insertions, searches and deletions: " << t_acc << " s." << endl;
         
         cout << "Average time per test: " << t_acc/num_tests << " s." << endl;
@@ -162,14 +166,14 @@ LLRBTree<K,V> readtree(const char* path)
 
 void opt_stresstest()
 {
-    int n_tests, m_elems;
+    int n_tests, m_init;
     char c;
     cout << endl << "maximum number of elements to test with: ";
-    cin >> m_elems;
-    while(m_elems < 1)
+    cin >> m_init;
+    while(m_init < 1)
     {
         cout << "enter a positive number: ";
-        cin >> m_elems;
+        cin >> m_init;
     }
     
     cout << "number of tests to execute: ";
@@ -177,7 +181,7 @@ void opt_stresstest()
     while(n_tests < 1)
     {
         cout << "enter a positive number: ";
-        cin >> m_elems;
+        cin >> m_init;
     }
 
     cout << "print output messages? (y/n): ";
@@ -187,7 +191,7 @@ void opt_stresstest()
         cout << "enter y for yes or n for no: ";
         cin >> c;
     } 
-    stresstest(n_tests, m_elems, true);
+    stresstest(n_tests, m_init, true);
 }
 
 LLRBTree<int,char> opt_readtree()
@@ -326,31 +330,38 @@ double test_delete(int n)
     return t;
 }
 
-void test_times(int tests, int multiplier)
+void test_times(int tests, int init, int op)
 {
-    int elems = 1024;
     ofstream ofs;
-    ofs.open("gnu/times.txt", std::ofstream::out | std::ofstream::trunc);
-    
-    ofs << "---------------Insert------------------" << endl;
-    for(int i = 0; i < tests; i++)
-    {
-        ofs << elems << "\t" << test_insert(elems) << endl;
-        elems *= 2;
-    }
-    elems = 1024;
-    ofs << "---------------Search------------------" << endl;    
-    for(int i = 0; i < tests; i++)
-    {
-        ofs << elems << "\t" << test_search(elems) << endl;
-        elems *= 2;
-    }   
-    elems = 1024;
-    ofs << "---------------Delete------------------" << endl;
-    for(int i = 0; i < tests; i++)
-    {
-        ofs << elems << "\t" << test_delete(elems) << endl;  
-        elems *= 2;
+    switch(op)
+        {
+            case INSERT :
+                ofs.open("gnu/insert.txt", std::ofstream::out | std::ofstream::trunc);
+                ofs << "---------------Insert------------------" << endl;
+                for(int i = 0; i < tests; i++)
+                {
+                    ofs << init << "\t\t" << test_insert(init) << endl;
+                    init *= 2;
+                }
+                break;
+            case SEARCH :
+                ofs.open("gnu/search.txt", std::ofstream::out | std::ofstream::trunc);       
+                ofs << "---------------Search------------------" << endl;    
+                for(int i = 0; i < tests; i++)
+                {
+                    ofs << init << "\t\t" << test_search(init) << endl;
+                    init *= 2;
+                }   
+                break;
+            case DELETE :
+                ofs.open("gnu/delete.txt", std::ofstream::out | std::ofstream::trunc);
+                ofs << "---------------Delete------------------" << endl;
+                for(int i = 0; i < tests; i++)
+                {
+                    ofs << init << "\t\t" << test_delete(init) << endl;  
+                    init *= 2;
+                }
+                break;
     }
     ofs.close();
 }
@@ -442,8 +453,10 @@ int main()
     }
     */
     
-    int multiplier = 2, tests = 12;
-    test_times(tests, multiplier);
+    int init = 1000, tests = 12;
+    test_times(tests, init, INSERT);
+    test_times(tests, init, SEARCH);
+    test_times(tests, init, DELETE);
 
 
     return 0;
