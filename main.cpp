@@ -326,23 +326,32 @@ double test_delete(int n)
     return t;
 }
 
-void test_times(int tests, int elems)
+void test_times(int tests, int multiplier)
 {
+    int elems = 1024;
     ofstream ofs;
     ofs.open("gnu/times.txt", std::ofstream::out | std::ofstream::trunc);
     
     ofs << "---------------Insert------------------" << endl;
     for(int i = 0; i < tests; i++)
-        ofs << test_insert(elems) << endl;
-
+    {
+        ofs << elems << "\t" << test_insert(elems) << endl;
+        elems *= 2;
+    }
+    elems = 1024;
     ofs << "---------------Search------------------" << endl;    
     for(int i = 0; i < tests; i++)
-        ofs << test_search(elems) << endl;
-        
+    {
+        ofs << elems << "\t" << test_search(elems) << endl;
+        elems *= 2;
+    }   
+    elems = 1024;
     ofs << "---------------Delete------------------" << endl;
     for(int i = 0; i < tests; i++)
-        ofs << test_delete(elems) << endl;        
-
+    {
+        ofs << elems << "\t" << test_delete(elems) << endl;  
+        elems *= 2;
+    }
     ofs.close();
 }
 
@@ -433,8 +442,8 @@ int main()
     }
     */
     
-    int elems = 10000, tests = 10;
-    test_times(20, 50000);
+    int multiplier = 2, tests = 12;
+    test_times(tests, multiplier);
 
 
     return 0;
