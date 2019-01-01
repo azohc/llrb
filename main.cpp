@@ -10,7 +10,9 @@ using std::cin;
 using std::cout;
 using std::endl;
 using std::ifstream;
+using std::ofstream;
 using std::istream;
+using std::vector;
 
 
 /*
@@ -32,26 +34,22 @@ static utime_t get_time ()
 }
 
 
-
-
 // Test LLRB Tree with random pairs of keys and values
 // executing max_elems insertions, searches and deletions num_tests times
 int stresstest(int num_tests, int max_elems, bool verbose)
 {
-    srand(time(NULL));
     double t_acc = 0;   // Accumulates time elapsed in executing a test loop
-    
     LLRBTree<int,int> llrb;
-    std::vector<int> keys;                  // Stores randomly generated keys
+    vector<int> keys;                  // Stores randomly generated keys
     std::unordered_map<int, int> keymap;    // Stores keys to ensure that every key in keys vector is unique
+    utime_t t0;
+    utime_t t1;
 
     try
     {
         for (int test = 1; test <= num_tests; test++)
         {
             int* values = new int[max_elems];       // Stores values associated to keys
-
-            utime_t t0 = get_time();
 
             // Insertion
             for (int i = 0; i < max_elems; i++)
@@ -70,29 +68,44 @@ int stresstest(int num_tests, int max_elems, bool verbose)
 
                 values[newkey] = rand();    // Duplicate key or not, generate random value
 
+                t0 = get_time();
                 llrb.insert(newkey, values[newkey]);
+                t1 = get_time();
+                t_acc += ((t1 - t0) / 1000000.0L);
             }
-
+            vector<int> keys_del;
+            keys_del = keys;
             // Search
             while (!keys.empty())
             {
                 int key = keys.back();
+                
+                t0 = get_time();
                 if (llrb.get(key) != values[key])
                     return -1;
+                t1 = get_time();
+                t_acc += ((t1 - t0) / 1000000.0L);
 
                 keys.pop_back();
             }
 
             // Deletion
-            for (int i = 0; i < max_elems; i++)
-                llrb.remove(keys[i]);
+            while (!keys_del.empty())
+            {
+                int key = keys.back();
+
+                t0 = get_time();
+                llrb.remove(key);
+                t1 = get_time();
+                t_acc += ((t1 - t0) / 1000000.0L);
+
+                keys_del.pop_back();
+            }
             
-            utime_t t1 = get_time();
 
             delete[] values;
             keymap.clear();
     
-            t_acc += ((t1 - t0) / 1000000.0L);
 
             if(verbose)
             {
@@ -147,18 +160,6 @@ LLRBTree<K,V> readtree(const char* path)
     return t;
 }
 
-template <class K, class V>
-void benchmark_insert(LLRBTree<K,V> &t, const std::vector<K> &keys, const std::vector<V> &vals)
-{
-    while(!keys.empty() && !vals.empty())
-    {
-        t.insert(keys.back(), vals.back());
-        keys.pop_back();
-        vals.pop_back();
-    }
-}
-
-
 void opt_stresstest()
 {
     int n_tests, m_elems;
@@ -198,6 +199,153 @@ LLRBTree<int,char> opt_readtree()
 
     return readtree<int,char>(path);
 }
+
+double test_insert(int n)
+{
+    //make tree 
+    LLRBTree<int,char> tree;
+    std::unordered_map<int, int> keymap;    // Stores keys to ensure that every key in keys vector is unique
+    vector<int> keys;
+    char *vals;
+    int k;
+    char v;
+    double t;
+    utime_t t0, t1;
+    tree = LLRBTree<int,char>();
+    vals = new char[n];
+    for(int i = 0; i < n; i++)
+    {
+        k = rand() % n;
+        if(!keymap[k])         // Only push keys that are not in the tree
+        {
+            keys.push_back(k);    
+            keymap[k]++;
+        }
+        vals[k] = rand();    
+    }
+
+    //test insertions
+    t = 0;
+    k = keys.back();
+    while(!keys.empty())
+    {
+        t0 = get_time();
+        tree.insert(k, vals[k]);
+        t1 = get_time();
+        t += (t1 - t0)/1000000.0L;
+        keys.pop_back();
+        k = keys.back();
+    }
+    cout << "time elapsed for " << n << " insertions: " << t << " s." << endl;
+    delete[]vals;
+    return t;
+}
+
+double test_search(int n)
+{
+    //make tree 
+    LLRBTree<int,char> tree;
+    std::unordered_map<int, int> keymap;    // Stores keys to ensure that every key in keys vector is unique
+    vector<int> keys;
+    char *vals;
+    int k;
+    char v;
+    double t;
+    utime_t t0, t1;
+    tree = LLRBTree<int,char>();
+    vals = new char[n];
+    for(int i = 0; i < n; i++)
+    {
+        k = rand() % n;
+        if(!keymap[k])         // Only push keys that are not in the tree
+        {
+            keys.push_back(k);    
+            keymap[k]++;
+        }
+        vals[k] = rand();    
+        tree.insert(k, vals[k]);
+    }
+
+    //test searches
+    t = 0;
+    k = keys.back();
+    while(!keys.empty())
+    {
+        t0 = get_time();
+        if (tree.get(k) != vals[k])
+            throw inexistent_key();
+        t1 = get_time();
+        t += (t1 - t0)/1000000.0L;
+        keys.pop_back();
+        k = keys.back();
+    }
+    cout << "time elapsed for " << n << " searches: " << t << " s." << endl;
+    delete[]vals;
+    return t;
+}
+
+double test_delete(int n)
+{
+    //make tree 
+    LLRBTree<int,char> tree;
+    std::unordered_map<int, int> keymap;    // Stores keys to ensure that every key in keys vector is unique
+    vector<int> keys;
+    char *vals;
+    int k;
+    char v;
+    double t;
+    utime_t t0, t1;
+    tree = LLRBTree<int,char>();
+    vals = new char[n];
+    for(int i = 0; i < n; i++)
+    {
+        k = rand() % n;
+        if(!keymap[k])         // Only push keys that are not in the tree
+        {
+            keys.push_back(k);    
+            keymap[k]++;
+        }
+        vals[k] = rand();    
+        tree.insert(k, vals[k]);
+    }
+
+    //test searches
+    t = 0;
+    k = keys.back();
+    while(!keys.empty())
+    {
+        t0 = get_time();
+        tree.remove(k);
+        t1 = get_time();
+        t += (t1 - t0)/1000000.0L;
+        keys.pop_back();
+        k = keys.back();
+    }
+    cout << "time elapsed for " << n << " deletions: " << t << " s." << endl;
+    delete[]vals;
+    return t;
+}
+
+void test_times(int tests, int elems)
+{
+    ofstream ofs;
+    ofs.open("gnu/times.txt", std::ofstream::out | std::ofstream::trunc);
+    
+    ofs << "---------------Insert------------------" << endl;
+    for(int i = 0; i < tests; i++)
+        ofs << test_insert(elems) << endl;
+
+    ofs << "---------------Search------------------" << endl;    
+    for(int i = 0; i < tests; i++)
+        ofs << test_search(elems) << endl;
+        
+    ofs << "---------------Delete------------------" << endl;
+    for(int i = 0; i < tests; i++)
+        ofs << test_delete(elems) << endl;        
+
+    ofs.close();
+}
+
 
 void opt_help()
 {
@@ -249,9 +397,13 @@ int getchoice(){
 
 int main()
 {
+    srand(time(NULL));
+    
+    /*
     printmenu();
     int choice = getchoice();
     LLRBTree<int,char> tree;
+    int n = 10000;
     while(choice)
     {
         switch(choice)
@@ -263,25 +415,14 @@ int main()
                 tree = opt_readtree();
                 break;
             case 3:
-                //make tree 
-                
-                //test insertions
-
+                test_insert(n);
                 break;
             case 4:
-                //if no tree to insert into (make isempty func (llrb)) -> gen tree 
-                
-                //test searches
-
+                test_search(n);
                 break;
             case 5:
-                //if no tree to delete from, make tree to delete from
-
-                //test deletion
-
+                test_delete(n);
                 break;
-
-                //maybe add case to print tree
             case 6: 
                 opt_help();
                 break;
@@ -290,31 +431,13 @@ int main()
             printmenu();
         choice = getchoice();
     }
+    */
     
+    int elems = 10000, tests = 10;
+    test_times(20, 50000);
+
 
     return 0;
-    
-    /*-----------------
-    stresstest(x, y, v)
-        x loops of y insertions, searches and deletions in a tree.
-        v (bool) verbose mode, enables/disables the printing of output messages 
-    --------------*/
-        
-
-
-    //LLRBTree <int,char> t_hh = readtree<int,char>("test_trees/test1.txt");
-
-    /*---------------
-    
-    --------------*/
-
-
-    //fun to measure insertion time
-
-
-    //fun to measure search time
-    //fun to measure deletion time
-
 }
 
 
