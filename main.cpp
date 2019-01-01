@@ -453,7 +453,7 @@ int main()
     }
     */
     
-    int init = 1000, tests = 12;
+    int init = 66, tests = 12;
     test_times(tests, init, INSERT);
     test_times(tests, init, SEARCH);
     test_times(tests, init, DELETE);
