@@ -1,8 +1,8 @@
 #!/usr/bin/gnuplot
 
-set title "plot"
-set xlabel "X"
-set ylabel "Y"
-set ytics "10"
-plot "data" title "dataplot" with lines
+set title "LLRB - Inserción"
+set xlabel "Elementos insertados"
+set ylabel "Tiempo (ms)"
+#set ytics "100"
+plot "data"  with lines
 pause -1 "Hit any key to continue"
