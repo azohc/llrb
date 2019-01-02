@@ -168,7 +168,7 @@ void opt_stresstest()
 {
     int n_tests, m_init;
     char c;
-    cout << endl << "maximum number of elements to test with: ";
+    cout << endl << "maximum number of elems to test with: ";
     cin >> m_init;
     while(m_init < 1)
     {
@@ -217,7 +217,7 @@ double test_insert(int n)
     utime_t t0, t1;
     tree = LLRBTree<int,char>();
     vals = new char[n];
-    for(int i = 0; i < n; i++)
+    for (int i = 0; i < n; i++)
     {
         k = rand() % n;
         if(!keymap[k])         // Only push keys that are not in the tree
@@ -236,11 +236,11 @@ double test_insert(int n)
         t0 = get_time();
         tree.insert(k, vals[k]);
         t1 = get_time();
-        t += (t1 - t0)/1000000.0L;
+        t += (t1 - t0)/1000.0L;
         keys.pop_back();
         k = keys.back();
     }
-    cout << "time elapsed for " << n << " insertions: " << t << " s." << endl;
+    cout << "time elapsed for " << n << " insertions: " << t << " ms." << endl;
     delete[]vals;
     return t;
 }
@@ -258,7 +258,7 @@ double test_search(int n)
     utime_t t0, t1;
     tree = LLRBTree<int,char>();
     vals = new char[n];
-    for(int i = 0; i < n; i++)
+    for (int i = 0; i < n; i++)
     {
         k = rand() % n;
         if(!keymap[k])         // Only push keys that are not in the tree
@@ -279,11 +279,11 @@ double test_search(int n)
         if (tree.get(k) != vals[k])
             throw inexistent_key();
         t1 = get_time();
-        t += (t1 - t0)/1000000.0L;
+        t += (t1 - t0)/1000.0L;
         keys.pop_back();
         k = keys.back();
     }
-    cout << "time elapsed for " << n << " searches: " << t << " s." << endl;
+    cout << "time elapsed for " << n << " searches: " << t << " ms." << endl;
     delete[]vals;
     return t;
 }
@@ -301,7 +301,7 @@ double test_delete(int n)
     utime_t t0, t1;
     tree = LLRBTree<int,char>();
     vals = new char[n];
-    for(int i = 0; i < n; i++)
+    for (int i = 0; i < n; i++)
     {
         k = rand() % n;
         if(!keymap[k])         // Only push keys that are not in the tree
@@ -321,48 +321,55 @@ double test_delete(int n)
         t0 = get_time();
         tree.remove(k);
         t1 = get_time();
-        t += (t1 - t0)/1000000.0L;
+        t += (t1 - t0)/1000.0L;
         keys.pop_back();
         k = keys.back();
     }
-    cout << "time elapsed for " << n << " deletions: " << t << " s." << endl;
+    cout << "time elapsed for " << n << " deletions: " << t << " ms." << endl;
     delete[]vals;
     return t;
 }
 
-void test_times(int tests, int init, int op)
+void test_times(int tests, int elems, int op)
 {
     ofstream ofs;
+    ofs << std::fixed;
+    double acc = 0;
     switch(op)
         {
             case INSERT :
-                ofs.open("gnu/insert.txt", std::ofstream::out | std::ofstream::trunc);
-                ofs << "---------------Insert------------------" << endl;
-                for(int i = 0; i < tests; i++)
-                {
-                    ofs << init << "\t\t" << test_insert(init) << endl;
-                    init *= 2;
-                }
+                ofs.open("gnu/insert.txt", std::ofstream::out | std::ofstream::app);
+                for (int i = 0; i < tests; i++)
+                    acc += test_insert(elems); 
+                 
+                cout << "total time for " << tests << "x" << elems << " insertions: " << acc << endl;
+                cout << "average time per " << elems << " insertions: " << acc/tests << " ms."<< endl;
+                cout << "average time per single insertion: " << (acc/tests)/elems << " ms." << endl;
                 break;
+                
             case SEARCH :
-                ofs.open("gnu/search.txt", std::ofstream::out | std::ofstream::trunc);       
-                ofs << "---------------Search------------------" << endl;    
-                for(int i = 0; i < tests; i++)
-                {
-                    ofs << init << "\t\t" << test_search(init) << endl;
-                    init *= 2;
-                }   
+                ofs.open("gnu/search.txt", std::ofstream::out | std::ofstream::app);       
+                for (int i = 0; i < tests; i++)
+                    acc += test_search(elems);
+
+                cout << "total time for " << tests << "x" << elems << " searches: " << acc << endl;
+                cout << "average time per " << elems << " searches: " << acc/tests << " ms."<< endl;
+                cout << "average time per single search: " << (acc/tests)/elems << " ms." << endl;
                 break;
+
             case DELETE :
-                ofs.open("gnu/delete.txt", std::ofstream::out | std::ofstream::trunc);
-                ofs << "---------------Delete------------------" << endl;
-                for(int i = 0; i < tests; i++)
-                {
-                    ofs << init << "\t\t" << test_delete(init) << endl;  
-                    init *= 2;
-                }
+                ofs.open("gnu/delete.txt", std::ofstream::out | std::ofstream::app);
+                for (int i = 0; i < tests; i++)
+                    acc += test_delete(elems);
+
+                cout << "total time for " << tests << "x" << elems << " deletions: " << acc << endl;              
+                cout << "average time per " << elems << " deletions: " << acc/tests << " ms." << endl;
+                cout << "average time per single deletion: " << (acc/tests)/elems << " ms." << endl;
                 break;
     }
+
+    ofs << elems << "\t" << acc/tests << endl; 
+    
     ofs.close();
 }
 
@@ -390,7 +397,8 @@ void opt_help()
         << "\t print this message." << endl << endl;
 }
 
-void printmenu(){
+void printmenu()
+{
     cout << endl << "left leaning red black tree test menu" << endl 
         << "\t1. \t->\t stress test" << endl
         << "\t2. \t->\t read tree from file" << endl
@@ -400,12 +408,13 @@ void printmenu(){
         << "\t6 \t->\t print help" << endl
         << "\t0. \t->\t exit" << endl;
 }
-int getchoice(){
+int getchoice()
+{
     int choice = -1;
 
     cout << "enter your option: ";
     cin >> choice;
-    while(choice < 0 || choice > 6)
+    while (choice < 0 || choice > 6)
     {
         cout << "enter your option (0 to 6): ";
         cin >> choice;
@@ -418,7 +427,7 @@ int getchoice(){
 int main()
 {
     srand(time(NULL));
-    
+    cout << std::fixed;
     /*
     printmenu();
     int choice = getchoice();
@@ -453,10 +462,23 @@ int main()
     }
     */
     
-    int init = 66, tests = 12;
-    test_times(tests, init, INSERT);
-    test_times(tests, init, SEARCH);
-    test_times(tests, init, DELETE);
+    int elems = 70, tests = 50, plus = elems * 4;
+    
+    for(int i = 0; i < 10; i++)
+    {
+        test_times(tests, elems, INSERT);
+        test_times(tests, elems, SEARCH);
+        test_times(tests, elems, DELETE);
+        if (i % 2 == 0)
+            elems += plus;
+        else
+        {
+            elems += elems;
+            plus = elems * 4;
+        }
+    }
+    
+   
 
 
     return 0;
