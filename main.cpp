@@ -428,7 +428,7 @@ int main()
 {
     srand(time(NULL));
     cout << std::fixed;
-    /*
+    
     printmenu();
     int choice = getchoice();
     LLRBTree<int,char> tree;
@@ -460,26 +460,23 @@ int main()
             printmenu();
         choice = getchoice();
     }
-    */
     
-    int elems = 70, tests = 50, plus = elems * 4;
     
-    for(int i = 0; i < 10; i++)
-    {
-        test_times(tests, elems, INSERT);
-        test_times(tests, elems, SEARCH);
-        test_times(tests, elems, DELETE);
-        if (i % 2 == 0)
-            elems += plus;
-        else
-        {
-            elems += elems;
-            plus = elems * 4;
-        }
-    }
+    // int elems = 70, tests = 50, plus = elems * 4;
     
-   
-
+    // for(int i = 0; i < 10; i++)
+    // {
+    //     test_times(tests, elems, INSERT);
+    //     test_times(tests, elems, SEARCH);
+    //     test_times(tests, elems, DELETE);
+    //     if (i % 2 == 0)
+    //         elems += plus;
+    //     else
+    //     {
+    //         elems += elems;
+    //         plus = elems * 4;
+    //     }
+    // }
 
     return 0;
 }
