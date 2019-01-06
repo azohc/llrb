@@ -433,47 +433,47 @@ int main()
     srand(time(NULL));
     cout << std::fixed;
     
-    printmenu();
-    int choice = getchoice();
-    LLRBTree<int,char> tree;
-    int n = 10000;
-    while(choice)
-    {
-        switch(choice)
-        {
-            case 1:
-                opt_stresstest();
-                break;
-            case 2:
-                tree = opt_readtree();
-                break;
-            case 3:
-                test_insert(n);
-                break;
-            case 4:
-                test_search(n);
-                break;
-            case 5:
-                test_delete(n);
-                break;
-            case 6: 
-                opt_help();
-                break;
-        }
-        if(choice != 6)
-            printmenu();
-        choice = getchoice();
-    }
-    
-    
-    // int elems = 11000000;
-    // for(int i = 0; i < 10; i++)
+    // printmenu();
+    // int choice = getchoice();
+    // LLRBTree<int,char> tree;
+    // int n = 10000;
+    // while(choice)
     // {
-    //     test_times(3, elems, INSERT);
-    //     test_times(3, elems, SEARCH);
-    //     test_times(3, elems, DELETE);
-    //     elems += 1000000;
+    //     switch(choice)
+    //     {
+    //         case 1:
+    //             opt_stresstest();
+    //             break;
+    //         case 2:
+    //             tree = opt_readtree();
+    //             break;
+    //         case 3:
+    //             test_insert(n);
+    //             break;
+    //         case 4:
+    //             test_search(n);
+    //             break;
+    //         case 5:
+    //             test_delete(n);
+    //             break;
+    //         case 6: 
+    //             opt_help();
+    //             break;
+    //     }
+    //     if(choice != 6)
+    //         printmenu();
+    //     choice = getchoice();
     // }
+    
+    
+    int elems = 605000;
+    for(int i = 0; i < 80; i++)
+    {
+        test_times(3, elems, INSERT);
+        test_times(3, elems, SEARCH);
+        test_times(3, elems, DELETE);
+        elems += 5000;
+    }
 
     return 0;
 }
