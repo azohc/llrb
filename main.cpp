@@ -211,7 +211,6 @@ double test_insert(int n)
     vector<int> keys;
     char *vals;
     int k;
-    char v;
     double t;
     utime_t t0, t1;
     tree = LLRBTree<int,char>();
@@ -252,7 +251,6 @@ double test_search(int n)
     vector<int> keys;
     char *vals;
     int k;
-    char v;
     double t;
     utime_t t0, t1;
     tree = LLRBTree<int,char>();
@@ -295,7 +293,6 @@ double test_delete(int n)
     vector<int> keys;
     char *vals;
     int k;
-    char v;
     double t;
     utime_t t0, t1;
     tree = LLRBTree<int,char>();
