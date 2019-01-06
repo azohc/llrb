@@ -239,7 +239,7 @@ double test_insert(int n)
         keys.pop_back();
         k = keys.back();
     }
-    cout << "time elapsed for " << n << " insertions: " << t << " ms." << endl;
+    // cout << "time elapsed for " << n << " insertions: " << t << " ms." << endl;
     delete[]vals;
     return t;
 }
@@ -282,7 +282,7 @@ double test_search(int n)
         keys.pop_back();
         k = keys.back();
     }
-    cout << "time elapsed for " << n << " searches: " << t << " ms." << endl;
+    // cout << "time elapsed for " << n << " searches: " << t << " ms." << endl;
     delete[]vals;
     return t;
 }
@@ -324,52 +324,60 @@ double test_delete(int n)
         keys.pop_back();
         k = keys.back();
     }
-    cout << "time elapsed for " << n << " deletions: " << t << " ms." << endl;
+    // cout << "time elapsed for " << n << " deletions: " << t << " ms." << endl;
     delete[]vals;
     return t;
 }
 
 void test_times(int tests, int elems, int op)
 {
-    ofstream ofs;
-    ofs << std::fixed;
+    ofstream ofspertest;
+    ofspertest << std::fixed;
+    ofstream ofsperop;
+    ofsperop << std::fixed;
     double acc = 0;
     switch(op)
         {
             case INSERT :
-                ofs.open("plots/insert.txt", std::ofstream::out | std::ofstream::app);
+                ofspertest.open("plots/testinsert.txt", std::ofstream::out | std::ofstream::app);
+                ofsperop.open("plots/opinsert.txt", std::ofstream::out | std::ofstream::app);
+
                 for (int i = 0; i < tests; i++)
                     acc += test_insert(elems); 
                  
                 cout << "total time for " << tests << "x" << elems << " insertions: " << acc << endl;
                 cout << "average time per " << elems << " insertions: " << acc/tests << " ms."<< endl;
-                cout << "average time per single insertion: " << (acc/tests)/elems << " ms." << endl;
+                cout << "average time per single insertion: " << acc/(tests*elems) << " ms." << endl;
                 break;
                 
             case SEARCH :
-                ofs.open("plots/search.txt", std::ofstream::out | std::ofstream::app);       
+                ofspertest.open("plots/testsearch.txt", std::ofstream::out | std::ofstream::app);       
+                ofsperop.open("plots/opsearch.txt", std::ofstream::out | std::ofstream::app);       
                 for (int i = 0; i < tests; i++)
                     acc += test_search(elems);
 
                 cout << "total time for " << tests << "x" << elems << " searches: " << acc << endl;
                 cout << "average time per " << elems << " searches: " << acc/tests << " ms."<< endl;
-                cout << "average time per single search: " << (acc/tests)/elems << " ms." << endl;
+                cout << "average time per single search: " << acc/(tests*elems) << " ms." << endl;
                 break;
 
             case DELETE :
-                ofs.open("plots/delete.txt", std::ofstream::out | std::ofstream::app);
+                ofspertest.open("plots/testdelete.txt", std::ofstream::out | std::ofstream::app);
+                ofsperop.open("plots/opdelete.txt", std::ofstream::out | std::ofstream::app);
                 for (int i = 0; i < tests; i++)
                     acc += test_delete(elems);
 
                 cout << "total time for " << tests << "x" << elems << " deletions: " << acc << endl;              
                 cout << "average time per " << elems << " deletions: " << acc/tests << " ms." << endl;
-                cout << "average time per single deletion: " << (acc/tests)/elems << " ms." << endl;
+                cout << "average time per single deletion: " << acc/(tests*elems) << " ms." << endl;
                 break;
     }
 
-    ofs << elems << "\t" << acc/tests << endl; 
+    ofspertest << elems << "\t" << acc/tests << endl; 
+    ofsperop << elems << "\t" << acc/(tests*elems) << endl; 
     
-    ofs.close();
+    ofspertest.close();
+    ofsperop.close();
 }
 
 
@@ -461,11 +469,13 @@ int main()
     // }
     
     
-    int elems = 10000;
-    for(int i = 0; i < 5; i++)
+    int elems = 1000;
+    for(int i = 0; i < 20; i++)
     {
-        test_times(50, elems, INSERT);
-        elems += 20000;
+        test_times(10, elems, INSERT);
+        test_times(10, elems, SEARCH);
+        test_times(10, elems, DELETE);
+        elems += 2000;
     }
 
     return 0;
