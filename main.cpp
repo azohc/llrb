@@ -4,7 +4,6 @@
 #include <vector>           // Key generation control
 #include <unordered_map>    // Key generation control    
 #include <fstream>          // Read example trees from files
-// #include <stdlib.h>
 
 using std::cin;
 using std::cout;
@@ -338,7 +337,7 @@ void test_times(int tests, int elems, int op)
     switch(op)
         {
             case INSERT :
-                ofs.open("gnu/insert.txt", std::ofstream::out | std::ofstream::app);
+                ofs.open("plots/insert.txt", std::ofstream::out | std::ofstream::app);
                 for (int i = 0; i < tests; i++)
                     acc += test_insert(elems); 
                  
@@ -348,7 +347,7 @@ void test_times(int tests, int elems, int op)
                 break;
                 
             case SEARCH :
-                ofs.open("gnu/search.txt", std::ofstream::out | std::ofstream::app);       
+                ofs.open("plots/search.txt", std::ofstream::out | std::ofstream::app);       
                 for (int i = 0; i < tests; i++)
                     acc += test_search(elems);
 
@@ -358,7 +357,7 @@ void test_times(int tests, int elems, int op)
                 break;
 
             case DELETE :
-                ofs.open("gnu/delete.txt", std::ofstream::out | std::ofstream::app);
+                ofs.open("plots/delete.txt", std::ofstream::out | std::ofstream::app);
                 for (int i = 0; i < tests; i++)
                     acc += test_delete(elems);
 
@@ -429,58 +428,45 @@ int main()
     srand(time(NULL));
     cout << std::fixed;
     
-    printmenu();
-    int choice = getchoice();
-    LLRBTree<int,char> tree;
-    int n = 10000;
-    while(choice)
-    {
-        switch(choice)
-        {
-            case 1:
-                opt_stresstest();
-                break;
-            case 2:
-                tree = opt_readtree();
-                break;
-            case 3:
-                test_insert(n);
-                break;
-            case 4:
-                test_search(n);
-                break;
-            case 5:
-                test_delete(n);
-                break;
-            case 6: 
-                opt_help();
-                break;
-        }
-        if(choice != 6)
-            printmenu();
-        choice = getchoice();
-    }
-    
-    
-    // int elems = 70, tests = 50, plus = elems * 4;
-    
-    // for(int i = 0; i < 10; i++)
+    // printmenu();
+    // int choice = getchoice();
+    // LLRBTree<int,char> tree;
+    // int n = 10000;
+    // while(choice)
     // {
-    //     test_times(tests, elems, INSERT);
-    //     test_times(tests, elems, SEARCH);
-    //     test_times(tests, elems, DELETE);
-    //     if (i % 2 == 0)
-    //         elems += plus;
-    //     else
+    //     switch(choice)
     //     {
-    //         elems += elems;
-    //         plus = elems * 4;
+    //         case 1:
+    //             opt_stresstest();
+    //             break;
+    //         case 2:
+    //             tree = opt_readtree();
+    //             break;
+    //         case 3:
+    //             test_insert(n);
+    //             break;
+    //         case 4:
+    //             test_search(n);
+    //             break;
+    //         case 5:
+    //             test_delete(n);
+    //             break;
+    //         case 6: 
+    //             opt_help();
+    //             break;
     //     }
+    //     if(choice != 6)
+    //         printmenu();
+    //     choice = getchoice();
     // }
+    
+    
+    int elems = 10000;
+    for(int i = 0; i < 5; i++)
+    {
+        test_times(50, elems, INSERT);
+        elems += 20000;
+    }
 
     return 0;
 }
-
-
-
-
