@@ -89,16 +89,14 @@ public:
     std::list<K> get_keys_inorder() const 
     {
         std::list<K> l;
-        if(_root != nullptr)
-            gen_key_list_inorder(l, _root);
+        gen_key_list_inorder(l, _root);
         return l;
     }
 
     std::list<V> get_values_inorder() const 
     {
         std::list<V> l;
-        if(_root != nullptr)
-            gen_val_list_inorder(l, _root);
+        gen_val_list_inorder(l, _root);
         return l;
     }
     
