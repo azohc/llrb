@@ -19,7 +19,7 @@ class inexistent_key : public std::exception
 public:
     virtual const char* what() const throw() 
     {
-        return "Specified key does not exist in the tree";
+        return "specified key does not exist in the tree";
     }
 };
 

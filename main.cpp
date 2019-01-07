@@ -28,132 +28,18 @@ static utime_t get_time ()
     return  now.tv_usec + (utime_t)now.tv_sec * 1000000;
 }
 
-// Test LLRB Tree with random pairs of keys and values
-// executing max_init insertions, searches and deletions num_tests times
-int stresstest(int num_tests, int max_init, bool verbose)
+template <class K, class V>
+void printtree(LLRBTree<K,V> t)
 {
-    double t_acc = 0;   // Accumulates time elapsed in executing a test loop
-    LLRBTree<int,int> llrb;
-    vector<int> keys;                  // Stores randomly generated keys
-    std::unordered_map<int, int> keymap;    // Stores keys to ensure that every key in keys vector is unique
-    utime_t t0;
-    utime_t t1;
+    std::list<K> kl = t.get_keys_inorder();
+    auto kit = kl.cbegin();
+    std::list<V> vl = t.get_values_inorder();
+    auto vit = vl.cbegin();
 
-    try
-    {
-        for (int test = 1; test <= num_tests; test++)
-        {
-            int* values = new int[max_init];       // Stores values associated to keys
-
-            // Insertion
-            for (int i = 0; i < max_init; i++)
-            {
-                int newkey = rand() % max_init;
-
-                // To prevent the generation of duplicate keys, uncomment the next two lines
-                // while(keymap.count(newkey))
-                //     newkey = rand() % max_init;
-
-                if(!keymap[newkey])         // Only push keys that are not in the tree
-                {
-                    keys.push_back(newkey);    
-                    keymap[newkey]++;
-                }
-
-                values[newkey] = rand();    // Duplicate key or not, generate random value
-
-                t0 = get_time();
-                llrb.insert(newkey, values[newkey]);
-                t1 = get_time();
-                t_acc += ((t1 - t0) / 1000000.0L);
-            }
-            vector<int> keys_del;
-            keys_del = keys;
-            // Search
-            while (!keys.empty())
-            {
-                int key = keys.back();
-                
-                t0 = get_time();
-                if (llrb.get(key) != values[key])
-                    return -1;
-                t1 = get_time();
-                t_acc += ((t1 - t0) / 1000000.0L);
-
-                keys.pop_back();
-            }
-
-            // Deletion
-            while (!keys_del.empty())
-            {
-                int key = keys.back();
-
-                t0 = get_time();
-                llrb.remove(key);
-                t1 = get_time();
-                t_acc += ((t1 - t0) / 1000000.0L);
-
-                keys_del.pop_back();
-            }
-            
-
-            delete[] values;
-            keymap.clear();
-    
-
-            if(verbose)
-            {
-                cout << ((t1 - t0) / 1000000.0L) << " seconds elapsed for test " << test 
-                    << "/" << num_tests << ". " << endl;  
-            }
-        }
-
-    } catch (std::exception& e)
-    {
-        cout << e.what() << endl;
-    }
-
-    if(verbose)
-    {
-        cout << endl << "All tests passed." << endl;
-
-        cout << "Seconds elapsed for " << num_tests << " tests of " << max_init 
-            << " insertions, searches and deletions: " << t_acc << " s." << endl;
-        
-        cout << "Average time per test: " << t_acc/num_tests << " s." << endl;
-    }   
-
-    return 0;
-}
-
-void opt_stresstest()
-{
-    int n_tests, m_init;
-    char c;
-    cout << endl << "maximum number of elems to test with: ";
-    cin >> m_init;
-    while(m_init < 1)
-    {
-        cout << "enter a positive number: ";
-        cin >> m_init;
-    }
-    
-    cout << "number of tests to execute: ";
-    cin >> n_tests;
-    while(n_tests < 1)
-    {
-        cout << "enter a positive number: ";
-        cin >> m_init;
-    }
-
-    cout << "print output messages? (y/n): ";
-    cin >> c;
-    while(tolower(c) != 'y' && tolower(c) != 'n')
-    {
-        cout << "enter y for yes or n for no: ";
-        cin >> c;
-    } 
-    stresstest(n_tests, m_init, true);
+    cout << "(" << *kit++ << ", " << *vit++ << ")"; 
+    while(kit != kl.cend())
+        cout << ", (" << *kit++ << ", " << *vit++ << ")"; 
+    cout << endl;
 }
 
 template <class K, class V>
@@ -181,17 +67,9 @@ LLRBTree<K,V> readtree(const std::string path)
     }
     
     f.close();
-    std::list<K> kl = t.get_keys_inorder();
-    auto kit = kl.cbegin();
-    std::list<V> vl = t.get_values_inorder();
-    auto vit = vl.cbegin();
-
-    cout << endl << "read tree (in order walk): ";
-    cout << "(" << *kit++ << ", " << *vit++ << ")"; 
-    while(kit != kl.cend())
-        cout << ", (" << *kit++ << ", " << *vit++ << ")"; 
-
-    cout << endl;
+    
+    cout << endl << "loaded tree (in order walk): ";
+    printtree(t);
     return t;
 }
 
@@ -199,7 +77,7 @@ LLRBTree<K,V> readtree(const std::string path)
 LLRBTree<int,char> opt_readtree()
 {
     std::string path;
-    cout << "enter a file path, 'test_trees/test1.txt', for example (don't include apostrophes!)." << endl
+    cout << "enter a file path, 'casos/c1.txt', for example (don't include apostrophes!)." << endl
         << "file path: ";
     cin >> path;
 
@@ -246,7 +124,7 @@ double test_insert(int n)
     return t;
 }
 
-void opt_insert()
+void opt_tinsert()
 {
     int n = -1;
     cout << "test_insert: performs a number of insertions on the tree" << endl; 
@@ -302,7 +180,7 @@ double test_search(int n)
     return t;
 }
 
-void opt_search()
+void opt_tsearch()
 {
     int n = -1;
     cout << "test_search: performs a number of searches on the tree" << endl; 
@@ -358,7 +236,7 @@ double test_delete(int n)
     return t;
 }
 
-void opt_delete()
+void opt_tdelete()
 {
     int n = -1;
     cout << "test_delete: performs a number of deletions on the tree" << endl; 
@@ -370,6 +248,57 @@ void opt_delete()
     }
     cout << endl;
     test_delete(n);
+}
+
+void opt_insert(LLRBTree<int,char> &t)
+{
+    int n;
+    char c;
+    cout << "enter a key value pair (separated by space) to add to the tree: ";
+    cin >> n >> c;
+    
+    t.insert(n, c);
+
+    cout << endl << "resulting tree (in order walk): ";
+    printtree(t);
+}
+
+void opt_search(LLRBTree<int,char> &t)
+{
+    int n;
+    char c;
+    cout << "enter a key to search in the tree: ";
+    cin >> n;
+    try
+    {
+        c = t.get(n);
+    } catch (inexistent_key &e) {
+        std::cerr << e.what() << endl;
+        return;
+    }
+
+    cout << endl << "value associated to " << n << " = " << c << endl;
+}
+
+void opt_delete(LLRBTree<int,char> &t)
+{
+    int n;
+    cout << "enter a key to delete from the tree: ";
+    cin >> n;
+    
+    
+    try
+    {
+        t.get(n);
+    } catch (inexistent_key &e) {
+        std::cerr << e.what() << endl;
+        return;
+    }
+
+    t.remove(n);
+
+    cout << endl << "resulting tree (in order walk): ";
+    printtree(t);
 }
 
 void test_times(int tests, int elems, int op)
@@ -426,36 +355,47 @@ void test_times(int tests, int elems, int op)
 
 void opt_help()
 {
-    cout << "1. -> stress test" << endl
-        << "\t perform X tests of Y insertions, searches and deletions." << endl
-        << "\t you must enter X and Y, and the option to print the output of tests." << endl << endl
-
-        << "2. -> read tree from file" << endl
+    cout << "1. -> read tree from file" << endl
         << "\t load a tree from a text file. there are files containing trees in the folder test_trees." << endl
         << "\t you must provide the path to a file that has a format similar to the test_trees files." << endl << endl
 
-        << "3. -> test insertion" << endl
+        << "2. -> insert element" << endl
+        << "\t provide an integer key and character value to insert into the tree." << endl << endl
+
+        << "3. -> search element" << endl
+        << "\t provide an integer key to search for its value in the tree." << endl << endl
+
+        << "4. -> delete element" << endl
+        << "\t provide an integer key to delete it from the tree." << endl << endl
+
+        << "5. -> test insertion" << endl
         << "\t measure the execution time of insert operation by inserting key value pairs into a tree." << endl << endl
 
-        << "4. -> test search" << endl
+        << "6. -> test search" << endl
         << "\t measure the execution time of search operation by getting key value pairs from a tree." << endl << endl
 
-        << "5. -> test deletion" << endl
+        << "7. -> test deletion" << endl
         << "\t measure the execution time of delete operation by deleting key value pairs from a tree." << endl << endl
 
-        << "6. -> print help" << endl
+        << "8. -> print tree" << endl
+        << "\t print current state of tree in order." << endl << endl
+
+        << "9. -> print help" << endl
         << "\t print this message." << endl << endl;
 }
 
 void printmenu()
 {
     cout << endl << "left leaning red black tree test menu" << endl 
-        << "\t1. \t->\t stress test" << endl
-        << "\t2. \t->\t read tree from file" << endl
-        << "\t3. \t->\t test insertion" << endl
-        << "\t4. \t->\t test search" << endl
-        << "\t5. \t->\t test deletion" << endl
-        << "\t6 \t->\t print help" << endl
+        << "\t1. \t->\t read tree from file" << endl
+        << "\t2. \t->\t insert element" << endl
+        << "\t3. \t->\t search element" << endl
+        << "\t4. \t->\t delete element" << endl
+        << "\t5. \t->\t test insertion" << endl
+        << "\t6. \t->\t test search" << endl
+        << "\t7. \t->\t test deletion" << endl
+        << "\t8. \t->\t print tree" << endl
+        << "\t9. \t->\t print help" << endl
         << "\t0. \t->\t exit" << endl;
 }
 int getchoice()
@@ -464,9 +404,9 @@ int getchoice()
 
     cout << "enter your option: ";
     cin >> choice;
-    while (choice < 0 || choice > 6)
+    while (choice < 0 || choice > 9)
     {
-        cout << "enter your option (0 to 6): ";
+        cout << "enter your option (0 to 9): ";
         cin >> choice;
     }
     cout << endl;
@@ -487,25 +427,34 @@ int main()
         switch(choice)
         {
             case 1:
-                opt_stresstest();
-                break;
-            case 2:
                 tree = opt_readtree();
                 break;
+            case 2:
+                opt_insert(tree);
+                break;
             case 3:
-                opt_insert();
+                opt_search(tree);
                 break;
             case 4:
-                opt_search();
+                opt_delete(tree);
                 break;
             case 5:
-                opt_delete();
+                opt_tinsert();
                 break;
-            case 6: 
+            case 6:
+                opt_tsearch();
+                break;
+            case 7:
+                opt_tdelete();
+                break;
+            case 8: 
+                printtree(tree);
+                break;
+            case 9: 
                 opt_help();
                 break;
         }
-        if(choice != 6)
+        if(choice != 8)
             printmenu();
         choice = getchoice();
     }
