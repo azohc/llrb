@@ -482,7 +482,6 @@ int main()
     printmenu();
     int choice = getchoice();
     LLRBTree<int,char> tree;
-
     while(choice)
     {
         switch(choice)
@@ -512,13 +511,13 @@ int main()
     }
     
     
-    // int elems = 505000;
-    // for(int i = 0; i < 100; i++)
+    // int elems = 1000000;
+    // for(int i = 0; i < 20; i++)
     // {
+    //     elems += 500000;
     //     test_times(3, elems, INSERT);
     //     test_times(3, elems, SEARCH);
     //     test_times(3, elems, DELETE);
-    //     elems += 5000;
     // }
 
     return 0;

@@ -144,22 +144,25 @@ private:
 
     nodeptr rec_insert(nodeptr h, const K &key, const V &value) 
     {
-        if (h == nullptr)
+        if (h == nullptr)   //Insert at the bottom of the tree, once a nullptr is reached
             return std::make_shared<Node>(Node(key, value));
 
-        if (key == h->_key) //Duplicate key, replace value
+        if (key == h->_key) //Matching key, replace value
             h->_value = value;       
         else if (key < h->_key) 
             h->_left = rec_insert(h->_left, key, value);     
         else              
             h->_right = rec_insert(h->_right, key, value);   
 
+        // Right leaning link (3 node)  -> rotateLeft to enforce left lean
         if (is_red(h->_right) && !is_red(h->_left))    
             h = rotate(LEFT, h); 
 
+        // Two consecutive red links (4 node) -> rotateRight to balance 4 node 
         if (is_red(h->_left) && is_red(h->_left->_left)) 
             h = rotate(RIGHT, h);   
 
+        // Both children are red links (4 node) -> split 4 node, passing red link up
         if (is_red(h->_left) && is_red(h->_right)) 
             color_flip(h);       
 
@@ -189,9 +192,15 @@ private:
 
                 if (key == h->_key) 
                 {
-                    nodeptr m = min_node(h->_right);
-                    h->_value = get(h->_right, m->_key)->_value;
+                    // NodeToDelete's right subtree != nullptr
+                    // Get successor node in right subtree
+                    nodeptr m = min_node(h->_right);    
+
+                    // Copy successor node's key and value
+                    h->_value = m->_value;
                     h->_key = m->_key;
+                    
+                    // Delete successor node from right subtree
                     h->_right = rec_delete_min(h->_right);
                 }
                 else
@@ -216,6 +225,7 @@ private:
         return fixup(h);
     }
 
+    // Binary search, no difference from a bst implementation
     nodeptr get(nodeptr x, const K &key)
     {
         if (x == nullptr) 
