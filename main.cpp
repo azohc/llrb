@@ -32,6 +32,11 @@ template <class K, class V>
 void printtree(LLRBTree<K,V> t)
 {
     std::list<K> kl = t.get_keys_inorder();
+    if(kl.empty())
+    {
+        cout << "tree is empty" << endl;
+        return;
+    }
     auto kit = kl.cbegin();
     std::list<V> vl = t.get_values_inorder();
     auto vit = vl.cbegin();

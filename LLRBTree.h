@@ -86,18 +86,19 @@ public:
         _root->_color = BLACK;
     }
 
-    //Maybe change list getters to take argument for inorder, preorder, postorder...
     std::list<K> get_keys_inorder() const 
     {
         std::list<K> l;
-        gen_key_list_inorder(l, _root);
+        if(_root != nullptr)
+            gen_key_list_inorder(l, _root);
         return l;
     }
 
     std::list<V> get_values_inorder() const 
     {
         std::list<V> l;
-        gen_val_list_inorder(l, _root);
+        if(_root != nullptr)
+            gen_val_list_inorder(l, _root);
         return l;
     }
     
