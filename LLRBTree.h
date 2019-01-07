@@ -253,15 +253,18 @@ private:
 
     nodeptr fixup(nodeptr h)
     {   
+        // Right leaning link (3 node)  -> rotateLeft to enforce left lean
         if (is_red(h->_right))       
             h = rotate(LEFT, h);
-        
+
+        // Two consecutive red links (4 node) -> rotateRight to balance 4 node 
         if (is_red(h->_left) && is_red(h->_left->_left)) 
-            h = rotate(RIGHT, h);
+            h = rotate(RIGHT, h);  
 
-        if(is_red(h->_left) && is_red(h->_right))          
-            color_flip(h);
-
+        // Both children are red links (4 node) -> split 4 node, passing red link up
+        if (is_red(h->_left) && is_red(h->_right)) 
+            color_flip(h);   
+            
         return h;
     }
 
