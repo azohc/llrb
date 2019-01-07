@@ -126,7 +126,7 @@ private:
         {
             _key = key;
             _value = value;
-            _color =    RED;
+            _color = RED;
             _left = nullptr;
             _right = nullptr;
         }
@@ -229,7 +229,7 @@ private:
     }
 
     // Performs a LEFT or RIGHT rotate on node h
-    // RIGHT ? RIGHT rotate node h : LEFT rotate node h
+    // RIGHT ? right rotate node h : left rotate node h
     nodeptr rotate(bool RIGHT, nodeptr h) 
     {
         nodeptr x;
