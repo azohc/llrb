@@ -4,6 +4,7 @@
 #include <vector>           // Key generation control
 #include <unordered_map>    // Key generation control    
 #include <fstream>          // Read example trees from files
+#include <string>
 
 using std::cin;
 using std::cout;
@@ -13,19 +14,10 @@ using std::ofstream;
 using std::istream;
 using std::vector;
 
-
 const int SEARCH = 1;
 const int INSERT = 2;
 const int DELETE = 3;
  
-/*
-La entrega se hará o sumo el 8 de Enero, a través del Campus Virtual, 
-- con un texto fuente que pueda ser compilado y ejecutado, 
-- ficheros de prueba, 
-- y una memoria de dos a cinco páginas 
-    que incluya algunos casos de prueba sencillos 
-    y las gŕaficas de tiempo de los casos de prueba voluminosos.
-*/
 
 // To measure the time elapsed during the execution of a section of code
 typedef unsigned long long utime_t;
@@ -35,7 +27,6 @@ static utime_t get_time ()
     gettimeofday(&now, NULL);
     return  now.tv_usec + (utime_t)now.tv_sec * 1000000;
 }
-
 
 // Test LLRB Tree with random pairs of keys and values
 // executing max_init insertions, searches and deletions num_tests times
@@ -135,34 +126,6 @@ int stresstest(int num_tests, int max_init, bool verbose)
     return 0;
 }
 
-template <class K, class V>
-LLRBTree<K,V> readtree(const char* path)
-{
-    LLRBTree<int,char> t;
-    ifstream f;
-    f.open(path);
-
-    if(f.is_open())
-        cout << "Opened example tree " << path << "." << endl;
-    else
-    { 
-        cout << "Failed to open file " << path << "." << endl 
-            << "Returning empty tree..." << endl;
-        return t;
-    }
-
-    K n;
-    V c;
-    while (!f.eof())
-    {
-        f >> n >> c;
-        t.insert(n, c);
-    }
-    
-    f.close();
-    return t;
-}
-
 void opt_stresstest()
 {
     int n_tests, m_init;
@@ -193,9 +156,49 @@ void opt_stresstest()
     stresstest(n_tests, m_init, true);
 }
 
+template <class K, class V>
+LLRBTree<K,V> readtree(const std::string path)
+{
+    LLRBTree<int,char> t;
+    ifstream f;
+    f.open(path);
+
+    if(f.is_open())
+        cout << "Opening example tree " << path << "." << endl;
+    else
+    { 
+        cout << "Failed to open file " << path << "." << endl 
+            << "Returning empty tree..." << endl;
+        return t;
+    }
+
+    K key;
+    V value;
+    while (!f.eof())
+    {
+        f >> key >> value;
+        t.insert(key, value);
+    }
+    
+    f.close();
+    std::list<K> kl = t.get_keys_inorder();
+    auto kit = kl.cbegin();
+    std::list<V> vl = t.get_values_inorder();
+    auto vit = vl.cbegin();
+
+    cout << endl << "read tree (in order walk): ";
+    cout << "(" << *kit++ << ", " << *vit++ << ")"; 
+    while(kit != kl.cend())
+        cout << ", (" << *kit++ << ", " << *vit++ << ")"; 
+
+    cout << endl;
+    return t;
+}
+
+
 LLRBTree<int,char> opt_readtree()
 {
-    char* path;
+    std::string path;
     cout << "enter a file path, 'test_trees/test1.txt', for example (don't include apostrophes!)." << endl
         << "file path: ";
     cin >> path;
@@ -238,9 +241,23 @@ double test_insert(int n)
         keys.pop_back();
         k = keys.back();
     }
-    // cout << "time elapsed for " << n << " insertions: " << t << " ms." << endl;
+    cout << "time elapsed for " << n << " insertions: " << t << " ms." << endl;
     delete[]vals;
     return t;
+}
+
+void opt_insert()
+{
+    int n = -1;
+    cout << "test_insert: performs a number of insertions on the tree" << endl; 
+    
+    while(n < 1)
+    {
+        cout << "enter the number of elements to test the tree with: ";
+        cin >> n;
+    }
+    cout << endl;
+    test_insert(n);
 }
 
 double test_search(int n)
@@ -280,10 +297,25 @@ double test_search(int n)
         keys.pop_back();
         k = keys.back();
     }
-    // cout << "time elapsed for " << n << " searches: " << t << " ms." << endl;
+    cout << "time elapsed for " << n << " searches: " << t << " ms." << endl;
     delete[]vals;
     return t;
 }
+
+void opt_search()
+{
+    int n = -1;
+    cout << "test_search: performs a number of searches on the tree" << endl; 
+    
+    while(n < 1)
+    {
+        cout << "enter the number of elements to test the tree with: ";
+        cin >> n;
+    }
+    cout << endl;
+    test_search(n);
+}
+
 
 double test_delete(int n)
 {
@@ -321,9 +353,23 @@ double test_delete(int n)
         keys.pop_back();
         k = keys.back();
     }
-    // cout << "time elapsed for " << n << " deletions: " << t << " ms." << endl;
+    cout << "time elapsed for " << n << " deletions: " << t << " ms." << endl;
     delete[]vals;
     return t;
+}
+
+void opt_delete()
+{
+    int n = -1;
+    cout << "test_delete: performs a number of deletions on the tree" << endl; 
+    
+    while(n < 1)
+    {
+        cout << "enter the number of elements to test the tree with: ";
+        cin >> n;
+    }
+    cout << endl;
+    test_delete(n);
 }
 
 void test_times(int tests, int elems, int op)
@@ -433,47 +479,47 @@ int main()
     srand(time(NULL));
     cout << std::fixed;
     
-    // printmenu();
-    // int choice = getchoice();
-    // LLRBTree<int,char> tree;
-    // int n = 10000;
-    // while(choice)
-    // {
-    //     switch(choice)
-    //     {
-    //         case 1:
-    //             opt_stresstest();
-    //             break;
-    //         case 2:
-    //             tree = opt_readtree();
-    //             break;
-    //         case 3:
-    //             test_insert(n);
-    //             break;
-    //         case 4:
-    //             test_search(n);
-    //             break;
-    //         case 5:
-    //             test_delete(n);
-    //             break;
-    //         case 6: 
-    //             opt_help();
-    //             break;
-    //     }
-    //     if(choice != 6)
-    //         printmenu();
-    //     choice = getchoice();
-    // }
-    
-    
-    int elems = 605000;
-    for(int i = 0; i < 80; i++)
+    printmenu();
+    int choice = getchoice();
+    LLRBTree<int,char> tree;
+
+    while(choice)
     {
-        test_times(3, elems, INSERT);
-        test_times(3, elems, SEARCH);
-        test_times(3, elems, DELETE);
-        elems += 5000;
+        switch(choice)
+        {
+            case 1:
+                opt_stresstest();
+                break;
+            case 2:
+                tree = opt_readtree();
+                break;
+            case 3:
+                opt_insert();
+                break;
+            case 4:
+                opt_search();
+                break;
+            case 5:
+                opt_delete();
+                break;
+            case 6: 
+                opt_help();
+                break;
+        }
+        if(choice != 6)
+            printmenu();
+        choice = getchoice();
     }
+    
+    
+    // int elems = 505000;
+    // for(int i = 0; i < 100; i++)
+    // {
+    //     test_times(3, elems, INSERT);
+    //     test_times(3, elems, SEARCH);
+    //     test_times(3, elems, DELETE);
+    //     elems += 5000;
+    // }
 
     return 0;
 }
