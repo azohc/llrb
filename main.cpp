@@ -454,7 +454,7 @@ int main()
                 opt_help();
                 break;
         }
-        if(choice != 8)
+        if(choice != 9)
             printmenu();
         choice = getchoice();
     }
