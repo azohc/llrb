@@ -1,17 +1,9 @@
 #ifndef llrbtree_h
 #define llrbtree_h
 
-/*
-http://cplusplus.kurttest.com/notes/llrb.html
-http://www.teachsolaisgames.com/articles/balanced_left_leaning.html
-https://stackoverflow.com/questions/37492768/inserting-element-into-LEFT-leaning-BLACK  RED-tree-c (good main for testing)
-http://www.cs.princeton.edu/~rs/talks/LLRB/Java/RedBlackBST.java
-*/
-
 #include <memory>
 #include <exception>
 #include <list>
-
 
 // Exception that arises with searches of keys that are not in the tree
 class inexistent_key : public std::exception 
@@ -22,7 +14,6 @@ public:
         return "specified key does not exist in the tree";
     }
 };
-
 
 template <class K, class V>
 class LLRBTree 
